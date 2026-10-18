@@ -67,7 +67,7 @@ docs/data-sources.md     Source evaluation: interfaces, formats, licence, costs
 Requirements: **Node.js 24 LTS**, **Git** and **VS Code**.
 
 ```bash
-git clone https://github.com/6roli/horizonte.git
+git clone https://github.com/6roli/Horizonte.git
 cd horizonte
 npm ci            # installs exact versions from package-lock.json
 npm run dev       # http://localhost:5173 — reloads on save
