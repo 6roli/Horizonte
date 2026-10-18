@@ -11,3 +11,6 @@
 
 /data/sample/*
   Cache-Control: public, max-age=86400
+
+/overlay/*
+  Cache-Control: public, max-age=604800

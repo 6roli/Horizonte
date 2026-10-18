@@ -9,6 +9,13 @@ import { extractTimeDimensions, layerCapabilitiesUrl } from './wms.ts';
 
 export const SAMPLE_MANIFEST_URL = 'data/sample/manifest.json';
 
+/**
+ * Coastlines and borders never change, so the overlay is bundled with the app
+ * (Natural Earth data, public domain, rendered once by EUMETView at the live
+ * frame size) instead of being requested from EUMETSAT on every visit.
+ */
+export const LIVE_OVERLAY_URL = 'overlay/coastlines-1200.png';
+
 /** Network calls give up after this long so the fallback appears quickly. */
 const REQUEST_TIMEOUT_MS = 12_000;
 
@@ -42,7 +49,8 @@ async function loadLiveSequence(): Promise<Sequence> {
       dimensions.set(layer.wmsLayer, extractTimeDimensions(xml, [name]).get(name)!);
     }),
   );
-  return buildLiveSequence(dimensions, new Date());
+  const sequence = buildLiveSequence(dimensions, new Date());
+  return { ...sequence, overlayUrl: new URL(LIVE_OVERLAY_URL, document.baseURI).href };
 }
 
 async function loadSampleSequence(pageUrl: string): Promise<Sequence> {
