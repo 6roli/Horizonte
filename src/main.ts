@@ -9,14 +9,16 @@ import {
   DEFAULT_LAYER_ID,
   LAYERS,
   LOCAL_TIME_ZONE,
+  MAX_PARALLEL_IMAGE_REQUESTS,
   PORTFOLIO_LABEL,
   PORTFOLIO_URL,
   type InformationKind,
   type LayerDefinition,
 } from './config/app.ts';
 import { assessFreshness, formatAge, type FreshnessReport } from './data/freshness.ts';
-import { loadSequence, resolveImageUrl, type LoadedSequence } from './data/load.ts';
+import { loadSequence, type LoadedSequence } from './data/load.ts';
 import { ImagePreloader } from './data/preload.ts';
+import type { Sequence } from './data/sequence.ts';
 import { t } from './i18n/index.ts';
 import type { StringKey } from './i18n/en.ts';
 import { createSatelliteMap, type SatelliteMap } from './ui/map.ts';
@@ -106,12 +108,12 @@ function renderStatus(kind: 'loading' | 'error' | 'sample' | 'stale' | 'outdated
   }
 }
 
-function renderFreshness(sequence: LoadedSequence, report: FreshnessReport): void {
+function renderFreshness(loaded: LoadedSequence, report: FreshnessReport): void {
   const age = formatAge(report.ageMinutes);
   switch (report.status) {
     case 'sample': {
-      const reason = sequence.liveProblem ? ` ${t('sampleReason')}: ${sequence.liveProblem}.` : '';
-      renderStatus('sample', `${t('sampleBody')}${reason} ${sequence.manifest.note ?? ''}`.trim());
+      const reason = loaded.liveProblem ? ` ${t('sampleReason')}: ${loaded.liveProblem}.` : '';
+      renderStatus('sample', `${t('sampleBody')}${reason} ${loaded.sequence.note ?? ''}`.trim());
       break;
     }
     case 'stale':
@@ -134,8 +136,7 @@ function addFact(list: HTMLDListElement, term: string, value: string | Node): vo
   list.append(dt, dd);
 }
 
-function renderSource(sequence: LoadedSequence, layer: LayerDefinition, report: FreshnessReport): void {
-  const { manifest } = sequence;
+function renderSource(sequence: Sequence, layer: LayerDefinition, report: FreshnessReport): void {
   const list = elements.sourceFacts;
   list.replaceChildren();
   addFact(list, t('satellite'), layer.satellite);
@@ -143,17 +144,17 @@ function renderSource(sequence: LoadedSequence, layer: LayerDefinition, report: 
   addFact(list, t('product'), layer.product);
   const serviceLink = document.createElement('a');
   serviceLink.href = 'https://view.eumetsat.int';
-  serviceLink.textContent = `${manifest.source.provider} — ${manifest.source.service}`;
+  serviceLink.textContent = `${sequence.source.provider} — ${sequence.source.service}`;
   addFact(list, t('service'), serviceLink);
-  addFact(list, t('licence'), `${manifest.source.licence}. ${manifest.source.attribution}.`);
-  const kindLabel = manifest.kind === 'live' ? t('sequenceKindLive') : t('sequenceKindSample');
+  addFact(list, t('licence'), `${sequence.source.licence}. ${sequence.source.attribution}.`);
+  const isLive = sequence.kind === 'live';
   addFact(
     list,
-    t('lastUpdate'),
-    `${formatUtc(new Date(manifest.generatedAt))} · ${kindLabel}` +
-      (manifest.kind === 'live' ? ` · ${t('age', { age: formatAge(report.ageMinutes) })}` : ''),
+    isLive ? t('checkedAt') : t('sampleCreated'),
+    `${formatUtc(new Date(sequence.retrievedAt))} · ${isLive ? t('sequenceKindLive') : t('sequenceKindSample')}`,
   );
-  elements.attribution.textContent = `${manifest.source.attribution}. ${manifest.source.licence}.`;
+  if (isLive) addFact(list, t('newestObservation'), t('age', { age: formatAge(report.ageMinutes) }));
+  elements.attribution.textContent = `${sequence.source.attribution}. ${sequence.source.licence}.`;
 }
 
 function renderLayerInfo(layer: LayerDefinition, isSample: boolean): void {
@@ -174,19 +175,17 @@ class Viewer {
   private speed: Speed = 'normal';
   private readonly preloader = new ImagePreloader();
   private readonly map: SatelliteMap;
-  private readonly sequence: LoadedSequence;
+  private readonly sequence: Sequence;
   private readonly report: FreshnessReport;
 
-  constructor(sequence: LoadedSequence, report: FreshnessReport) {
+  constructor(sequence: Sequence, report: FreshnessReport) {
     this.sequence = sequence;
     this.report = report;
-    const { manifest } = sequence;
-    const available = LAYERS.filter((layer) => manifest.layerIds.includes(layer.id));
+    const available = LAYERS.filter((layer) => sequence.layerIds.includes(layer.id));
     this.layer = available.find((layer) => layer.id === DEFAULT_LAYER_ID) ?? available[0];
-    this.index = manifest.frames.length - 1; // start on the newest observation
+    this.index = sequence.frames.length - 1; // start on the newest observation
 
-    const overlayUrl = manifest.overlay ? resolveImageUrl(sequence, manifest.overlay) : undefined;
-    this.map = createSatelliteMap(elements.map, manifest, overlayUrl, elements.cursor);
+    this.map = createSatelliteMap(elements.map, sequence, elements.cursor);
     elements.map.setAttribute('aria-label', t('mapLabel'));
 
     this.buildLayerOptions(available);
@@ -196,11 +195,11 @@ class Viewer {
   }
 
   private get frames() {
-    return this.sequence.manifest.frames;
+    return this.sequence.frames;
   }
 
   private imageUrl(index: number): string {
-    return resolveImageUrl(this.sequence, this.frames[index].images[this.layer.id]);
+    return this.frames[index].images[this.layer.id];
   }
 
   private isUnavailable = (index: number): boolean => this.preloader.statusOf(this.imageUrl(index)) === 'failed';
@@ -257,14 +256,12 @@ class Viewer {
     this.render();
   }
 
-  /** Loads the newest frame first, then the rest, and re-renders on failures. */
+  /** Loads the newest frame first, then older ones, a few at a time; re-renders on failures. */
   private preloadLayer(): void {
-    const order = this.frames.map((_, index) => index).reverse();
-    for (const index of order) {
-      void this.preloader.load(this.imageUrl(index)).then((status) => {
-        if (status === 'failed' && index === this.index) this.render();
-      });
-    }
+    const urls = this.frames.map((_, index) => this.imageUrl(index)).reverse();
+    void this.preloader.loadAll(urls, MAX_PARALLEL_IMAGE_REQUESTS, (url, status) => {
+      if (status === 'failed' && url === this.imageUrl(this.index)) this.render();
+    });
   }
 
   private goTo(index: number): void {
@@ -315,7 +312,7 @@ class Viewer {
     elements.timeline.setAttribute('aria-valuetext', formatUtc(time));
     elements.frameCount.textContent = t('frameOf', { current: this.index + 1, total: this.frames.length });
 
-    renderLayerInfo(this.layer, this.sequence.manifest.kind === 'sample');
+    renderLayerInfo(this.layer, this.sequence.kind === 'sample');
     renderSource(this.sequence, this.layer, this.report);
     this.renderPlayButton();
   }
@@ -327,11 +324,11 @@ async function start(): Promise<void> {
   if (viewer) return;
   renderStatus('loading');
   try {
-    const sequence = await loadSequence();
-    const report = assessFreshness(sequence.manifest, new Date());
-    renderFreshness(sequence, report);
+    const loaded = await loadSequence();
+    const report = assessFreshness(loaded.sequence, new Date());
+    renderFreshness(loaded, report);
     elements.viewer.hidden = false;
-    viewer = new Viewer(sequence, report);
+    viewer = new Viewer(loaded.sequence, report);
   } catch (error) {
     elements.viewer.hidden = true;
     renderStatus('error', error instanceof Error ? error.message : String(error));

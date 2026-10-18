@@ -2,7 +2,7 @@
  * Small, dependency-free helpers for the OGC WMS 1.3.0 requests Horizonte needs.
  * Pure functions only, so they can be unit-tested without network access.
  */
-import type { Bbox } from '../../src/config/app.ts';
+import type { Bbox } from '../config/app.ts';
 
 /** One availability entry from a WMS time dimension. */
 export type TimeAvailability =
@@ -87,6 +87,16 @@ export function extractTimeDimensions(capabilitiesXml: string, layerNames: strin
     result.set(layerName, match[1].trim());
   }
   return result;
+}
+
+/**
+ * GeoServer "virtual service" capabilities for a single layer, e.g.
+ * mtg_fd:rgb_geocolour → <base>/mtg_fd/rgb_geocolour/ows?…  (~7 kB instead of ~280 kB for all layers).
+ */
+export function layerCapabilitiesUrl(geoserverBase: string, wmsLayer: string): string {
+  const [workspace, layer] = wmsLayer.split(':');
+  if (!workspace || !layer) throw new Error(`Expected "workspace:layer", got "${wmsLayer}"`);
+  return `${geoserverBase}/${workspace}/${layer}/ows?service=WMS&version=1.3.0&request=GetCapabilities`;
 }
 
 export interface GetMapOptions {

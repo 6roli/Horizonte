@@ -2,10 +2,12 @@ node_modules/
 dist/
 .wrangler/
 
-# Live frames are produced by CI every hour and never committed.
 # Only the small historical sample in public/data/sample/ is versioned.
-public/data/live/
 public/data/*.tmp/
+
+# Python analyses (when added): local virtual environment
+.venv/
+__pycache__/
 
 # Secrets and local environment
 .env

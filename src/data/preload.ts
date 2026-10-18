@@ -1,6 +1,7 @@
 /**
  * Preloads frame images so playback is smooth, and records which ones fail.
- * Images are static files on our own host, cached by the browser and CDN.
+ * Live images come from EUMETView (cached by the browser for 7 days, per its
+ * Cache-Control header); sample images are static files on our own host.
  */
 export type ImageStatus = 'loading' | 'loaded' | 'failed';
 
@@ -28,6 +29,18 @@ export class ImagePreloader {
       image.src = url;
     }
     return promise;
+  }
+
+  /** Loads URLs in order with at most `limit` requests in flight. */
+  async loadAll(urls: string[], limit: number, onSettled: (url: string, status: ImageStatus) => void): Promise<void> {
+    let next = 0;
+    const worker = async () => {
+      while (next < urls.length) {
+        const url = urls[next++];
+        onSettled(url, await this.load(url));
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(limit, urls.length) }, worker));
   }
 
   statusOf(url: string): ImageStatus | undefined {

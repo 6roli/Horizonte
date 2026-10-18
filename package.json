@@ -12,8 +12,7 @@
     "preview": "vite preview --host",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "fetch:live": "node scripts/fetch-frames.ts --kind live",
-    "fetch:sample": "node scripts/fetch-frames.ts --kind sample",
+    "make:sample": "node scripts/make-sample.ts",
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {

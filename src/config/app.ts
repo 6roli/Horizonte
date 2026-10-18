@@ -84,7 +84,8 @@ export const LAYERS: LayerDefinition[] = [
 export const DEFAULT_LAYER_ID = 'geocolour';
 
 /** EUMETSAT's public Web Map Service (no account needed). */
-export const WMS_ENDPOINT = 'https://view.eumetsat.int/geoserver/wms';
+export const GEOSERVER_BASE = 'https://view.eumetsat.int/geoserver';
+export const WMS_ENDPOINT = `${GEOSERVER_BASE}/wms`;
 
 /** Static coastline and border overlay (Natural Earth, served by EUMETView). */
 export const OVERLAY_WMS_LAYERS = ['backgrounds:ne_10m_coastline', 'backgrounds:ne_boundary_lines_land'];
@@ -94,7 +95,7 @@ export function attributionText(year: number): string {
   return `Contains modified EUMETSAT Meteosat data ${year}`;
 }
 
-/** Sequence settings used by the update job. */
+/** Sequence length: 18 frames, 20 minutes apart = the last 6 hours. */
 export const SEQUENCE = {
   frameCount: 18,
   /** Minutes between frames. FCI produces an image every 10 minutes. */
@@ -102,10 +103,16 @@ export const SEQUENCE = {
 } as const;
 
 /**
- * Freshness thresholds for live data. Updates are scheduled hourly and EUMETView
- * publishes images with some delay, so the newest frame is normally 20–90 minutes old.
+ * Freshness thresholds for live data. EUMETView normally publishes an FCI image
+ * 15–30 minutes after the scan starts, so anything much older signals a delay.
  */
 export const FRESHNESS = {
-  staleAfterMinutes: 150,
-  outdatedAfterMinutes: 360,
+  staleAfterMinutes: 60,
+  outdatedAfterMinutes: 180,
 } as const;
+
+/**
+ * Images requested from EUMETView in parallel by each browser. EUMETView allows
+ * 8 concurrent requests per user; staying lower keeps the app a polite client.
+ */
+export const MAX_PARALLEL_IMAGE_REQUESTS = 3;

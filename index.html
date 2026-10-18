@@ -111,15 +111,22 @@
           under the CC BY 4.0 licence with attribution.
         </p>
 
-        <h3>How Horizonte prepares them</h3>
+        <h3>How Horizonte gets them</h3>
         <ol>
-          <li>Once an hour, an automated job asks EUMETView which observation times are available.</li>
+          <li>When you open the page, your browser asks EUMETView which observation times are available (a small request per layer).</li>
           <li>
-            It downloads a crop of the region for a few hours of observations (one frame every 20 minutes) for each
-            layer, plus a coastline and border overlay.
+            It then requests a crop of the region for the last six hours (one frame every 20 minutes), plus a coastline
+            and border overlay. EUMETView renders these images; your browser caches them.
           </li>
-          <li>It checks every file and records the observation times in a manifest, then publishes the files as a static website.</li>
-          <li>Your browser only downloads these prepared images. Visiting the page sends no requests to EUMETSAT.</li>
+          <li>
+            If EUMETView cannot be reached, Horizonte shows a small historical sample stored with the app, clearly
+            labelled as such.
+          </li>
+          <li>
+            There is no Horizonte server: the app is a set of static files, with no cookies or tracking. Because your
+            browser requests the images from <code>view.eumetsat.int</code> directly, EUMETSAT receives the usual
+            technical request data, such as your IP address.
+          </li>
         </ol>
 
         <h3>Limitations</h3>
@@ -139,8 +146,8 @@
             (parallax).
           </li>
           <li>
-            Updates are hourly and EUMETView publishes images with a delay, so the newest frame is normally 20 to 90
-            minutes old. Older data is flagged on the page.
+            EUMETView publishes each image some 15 to 30 minutes after the scan starts, so the newest frame is never
+            real time. Older data is flagged on the page. Reload the page to check for newer images.
           </li>
           <li>The region does not include the Canary Islands.</li>
         </ul>

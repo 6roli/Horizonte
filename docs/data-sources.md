@@ -12,7 +12,7 @@ numerical data.
 
 | Source | Interface | Format | Access | Licence / cost | Fit for v1 |
 |---|---|---|---|---|---|
-| **EUMETView** (`view.eumetsat.int`) | OGC WMS 1.3.0 (GeoServer), WMTS | Rendered PNG/JPEG for any bbox, size and time; time dimension per layer (MTG every 10 min, MSG every 15 min) | Public, no account. Capabilities report `Fees: none`, `AccessConstraints: none`. Observed limits: 20 req/s per client (excess delayed), 8 concurrent | Image products = *Advanced Image Products* → **Core data, CC BY 4.0** | ✅ **Chosen.** Exactly the visual products needed, cropped server-side |
+| **EUMETView** (`view.eumetsat.int`) | OGC WMS 1.3.0 (GeoServer), WMTS | Rendered PNG/JPEG for any bbox, size and time; time dimension per layer (MTG every 10 min, MSG every 15 min) | Public, no account. Capabilities report `Fees: none`, `AccessConstraints: none`. Observed limits: 20 req/s per client (excess delayed), 8 concurrent | Image products = *Advanced Image Products* → **Core data, CC BY 4.0** | ✅ **Chosen.** Exactly the visual products needed, cropped server-side, loadable directly by the browser |
 | **EUMETSAT Data Store** (`data.eumetsat.int`) | REST API + Data Tailor (cropping, reformatting) | Level 1c FCI NetCDF (full disc, hundreds of MB per time step), Level 2 products | Free EUMETSAT account and API keys | Level 1 data < 1 h latency = *Recommended* (licensed, no redistribution of numerical data); hourly / ≥ 1 h latency free | Later, for **analysis** (e.g. cloud-top temperature, detections). Heavy processing, so not needed for viewing |
 | **EUMETCast** | Satellite/terrestrial broadcast | Native formats | Reception station + registration | Licensed | ❌ Not proportionate |
 | Windy, Zoom Earth and similar viewers | — | — | — | Third-party renderings, not an authorised source | ❌ Excluded by design |
@@ -40,16 +40,26 @@ EUMETSAT Data Policy (amended 2024–2025), Articles 5–6 and Annex definitions
 - Attribution required: "[Contains modified] EUMETSAT [Meteosat/Metop] [data/product] [Year]".
   Horizonte crops and reprojects, so it uses **"Contains modified EUMETSAT Meteosat data 2026"**.
 
+## Why images load directly from EUMETView
+
+The first design pre-computed crops every hour in GitHub Actions and served them from Cloudflare. It was
+replaced by direct loading because:
+
+- EUMETView is built to serve map images to web clients, sends `Access-Control-Allow-Origin: *`, and marks
+  images as cacheable for 7 days;
+- it removes a scheduled job, deployment secrets and ~750 Actions minutes per month;
+- the images are always as current as EUMETView itself.
+
+To be a polite client, the browser requests one small capabilities document per layer, loads at most 3 images
+at a time (EUMETView allows 8 concurrent requests), loads only the visible layer, and does not poll.
+
+If traffic ever grows enough to matter, the earlier approach (scheduled crops served as static files) can be
+restored; it is in this repository's history.
+
 ## Time correctness
 
-- Frame times are chosen from the layer's own time dimension and requested exactly.
-- GeoServer silently returns the *nearest* image when a time does not exist. For single-channel layers it
-  says so in a `Warning: 99 Nearest value used` header; the fetch script rejects such frames. RGB layers do
-  not send this header, so the script only requests times listed in their capabilities.
+- Frame times are taken from each layer's own time dimension and requested exactly.
+- GeoServer silently returns the *nearest* image when a requested time does not exist. Requesting only advertised
+  times avoids that. The sample script additionally rejects responses carrying a
+  `Warning: 99 Nearest value used` header (sent for single-channel layers).
 - Timestamps are the nominal scan start in UTC.
-
-## Precomputation and caching
-
-- ~37 requests per hourly run, from CI only. Each run uses ~3 MB of images.
-- Frames have time-stamped names and are cached for a day by browsers; the manifest is revalidated.
-- A failed run keeps the previous deployment; the browser flags data older than 2.5 h (stale) and 6 h (outdated).

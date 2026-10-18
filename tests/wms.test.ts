@@ -9,7 +9,7 @@ import {
   parseIsoDuration,
   parseTimeDimension,
   selectFrameTimes,
-} from '../scripts/lib/wms.ts';
+} from '../src/data/wms.ts';
 
 const at = (iso: string) => Date.parse(iso);
 

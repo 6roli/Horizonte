@@ -1,6 +1,6 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import type { Manifest } from '../data/manifest.ts';
+import type { Sequence } from '../data/sequence.ts';
 import { t } from '../i18n/index.ts';
 
 /**
@@ -14,11 +14,10 @@ export interface SatelliteMap {
 
 export function createSatelliteMap(
   container: HTMLElement,
-  manifest: Manifest,
-  overlayUrl: string | undefined,
+  sequence: Sequence,
   cursorOutput: HTMLOutputElement,
 ): SatelliteMap {
-  const { west, south, east, north } = manifest.region.bbox;
+  const { west, south, east, north } = sequence.bbox;
   const bounds = L.latLngBounds([south, west], [north, east]);
 
   const map = L.map(container, {
@@ -38,11 +37,11 @@ export function createSatelliteMap(
 
   const image = L.imageOverlay('', bounds, {
     alt: '',
-    attribution: `${manifest.source.attribution} · ${manifest.source.licence}`,
+    attribution: `${sequence.source.attribution} · ${sequence.source.licence}`,
   }).addTo(map);
 
-  if (overlayUrl) {
-    L.imageOverlay(overlayUrl, bounds, { alt: '', interactive: false, zIndex: 2 }).addTo(map);
+  if (sequence.overlayUrl) {
+    L.imageOverlay(sequence.overlayUrl, bounds, { alt: '', interactive: false, zIndex: 2 }).addTo(map);
   }
 
   L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);

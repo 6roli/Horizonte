@@ -1,23 +1,13 @@
 # Cloudflare Pages response headers (https://developers.cloudflare.com/pages/configuration/headers/)
+# Images and capabilities are loaded directly from EUMETSAT's EUMETView service.
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: https://view.eumetsat.int; connect-src 'self' https://view.eumetsat.int; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Frames have unique, time-stamped names and never change once published.
-/data/live/frames/*
+/data/sample/*
   Cache-Control: public, max-age=86400
-
-/data/sample/frames/*
-  Cache-Control: public, max-age=86400
-
-# The manifest changes every hour; browsers must revalidate it.
-/data/live/manifest.json
-  Cache-Control: public, max-age=0, must-revalidate
-
-/data/sample/manifest.json
-  Cache-Control: public, max-age=0, must-revalidate

@@ -1,9 +1,15 @@
 import { FRESHNESS } from '../config/app.ts';
-import type { Manifest } from './manifest.ts';
+import type { SequenceKind } from './manifest.ts';
+
+/** Anything with a kind and time-ordered frames: a sample manifest or a live sequence. */
+interface TimedFrames {
+  kind: SequenceKind;
+  frames: { time: string }[];
+}
 
 /**
  * - fresh: recent enough to be called "latest".
- * - stale: the update job is probably delayed; show a warning.
+ * - stale: EUMETView is publishing late (or the sample is old); show a warning.
  * - outdated: treat as old data; show a prominent warning.
  * - sample: a fixed historical example, never presented as current.
  */
@@ -15,13 +21,13 @@ export interface FreshnessReport {
   ageMinutes: number;
 }
 
-export function latestFrameTime(manifest: Manifest): Date {
-  return new Date(manifest.frames[manifest.frames.length - 1].time);
+export function latestFrameTime(sequence: TimedFrames): Date {
+  return new Date(sequence.frames[sequence.frames.length - 1].time);
 }
 
-export function assessFreshness(manifest: Manifest, now: Date): FreshnessReport {
-  const ageMinutes = Math.max(0, Math.round((now.getTime() - latestFrameTime(manifest).getTime()) / 60_000));
-  if (manifest.kind === 'sample') return { status: 'sample', ageMinutes };
+export function assessFreshness(sequence: TimedFrames, now: Date): FreshnessReport {
+  const ageMinutes = Math.max(0, Math.round((now.getTime() - latestFrameTime(sequence).getTime()) / 60_000));
+  if (sequence.kind === 'sample') return { status: 'sample', ageMinutes };
   if (ageMinutes >= FRESHNESS.outdatedAfterMinutes) return { status: 'outdated', ageMinutes };
   if (ageMinutes >= FRESHNESS.staleAfterMinutes) return { status: 'stale', ageMinutes };
   return { status: 'fresh', ageMinutes };
