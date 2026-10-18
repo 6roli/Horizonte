@@ -9,7 +9,7 @@
 export const APP_NAME = 'Horizonte';
 
 /** Link back to the portfolio. Update when a custom domain is connected. */
-export const PORTFOLIO_URL = 'https://gabriel-olius.pages.dev';
+export const PORTFOLIO_URL = 'https://portfolio.gabriel-olius.workers.dev';
 export const PORTFOLIO_LABEL = 'Gabriel Olius — portfolio';
 
 /** Time zone shown next to UTC. Peninsular Spain and the Balearic Islands. */

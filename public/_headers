@@ -1,4 +1,4 @@
-# Cloudflare Pages response headers (https://developers.cloudflare.com/pages/configuration/headers/)
+# Cloudflare response headers (https://developers.cloudflare.com/workers/static-assets/headers/)
 # Images and capabilities are loaded directly from EUMETSAT's EUMETView service.
 /*
   X-Content-Type-Options: nosniff

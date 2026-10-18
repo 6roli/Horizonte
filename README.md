@@ -6,9 +6,9 @@ coast. *Horizonte* is a provisional name, defined once in `src/config/app.ts` (`
 
 | | |
 |---|---|
-| Live app | https://horizonte.pages.dev *(final address confirmed after the first deployment)* |
+| Live app | https://horizonte.gabriel-olius.workers.dev *(final address confirmed after the first deployment)* |
 | Data | EUMETSAT EUMETView WMS — Meteosat-12 (MTG-I1) FCI. Public, no account, CC BY 4.0 |
-| Hosting | Cloudflare Pages, Free plan, connected to this repository |
+| Hosting | Cloudflare (Workers static assets), Free plan, connected to this repository |
 | Monthly cost | €0 |
 
 **Scope of v1:** observations only. No forecasts, estimates, detections, alerts or warnings.
@@ -24,13 +24,13 @@ coast. *Horizonte* is a provisional name, defined once in `src/config/app.ts` (`
 | **Vitest** | Your computer and Cloudflare's build server | Unit tests for the logic that matters: time handling, data validation, playback. |
 | **Node.js + npm** | Your computer and Cloudflare's build server | Installs the tools above and runs the build. Node also runs `scripts/make-sample.ts` directly (built-in TypeScript support, Node 24+). |
 | **EUMETView WMS** (EUMETSAT) | EUMETSAT's servers | Renders the Meteosat images for the requested area and time. |
-| **Cloudflare Pages** | Cloudflare | Builds the site on every push and serves the static files over HTTPS. |
+| **Cloudflare** (Workers static assets) | Cloudflare | Builds the site on every push and serves the static files over HTTPS. |
 | **Python** | Not used yet | Reserved for future analyses (see below). |
 
 ## How it works
 
 ```
-Browser opens the page (static files from Cloudflare Pages)
+Browser opens the page (static files from Cloudflare)
   1. asks EUMETView which observation times exist   (1 small XML request per layer, ~7 kB)
   2. picks the last 18 times common to both layers, 20 minutes apart (6 hours)
   3. loads each 1200×550 image from EUMETView, 3 at a time, newest first (browser-cached)
@@ -150,8 +150,8 @@ Publish only the small results the app needs (images, JSON) into `public/data/`,
 
 | Item | Cost | Notes |
 |---|---|---|
-| Hosting | €0 | Cloudflare Pages Free: static requests and bandwidth are unlimited; no payment method needed |
-| Builds | €0 | 500 builds/month per Cloudflare account on the Free plan; one build per push |
+| Hosting | €0 | Cloudflare Free (Workers static assets): static requests are free and unlimited; no payment method needed |
+| Builds | €0 | Cloudflare Workers Builds free quota; ~1 build minute per push |
 | Data | €0 | EUMETView is public; its capabilities state `Fees: none` |
 | Domain | — | Not purchased (see the portfolio's `docs/domain.md`) |
 

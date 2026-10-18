@@ -62,9 +62,9 @@ describe('sequenceFromManifest', () => {
       },
       ['geocolour', 'ir105'],
     );
-    const sequence = sequenceFromManifest(manifest, new URL('https://horizonte.pages.dev/data/sample/manifest.json'));
-    expect(sequence.frames[0].images.geocolour).toBe('https://horizonte.pages.dev/data/sample/frames/g.jpg');
-    expect(sequence.overlayUrl).toBe('https://horizonte.pages.dev/data/sample/overlay.png');
+    const sequence = sequenceFromManifest(manifest, new URL('https://horizonte.gabriel-olius.workers.dev/data/sample/manifest.json'));
+    expect(sequence.frames[0].images.geocolour).toBe('https://horizonte.gabriel-olius.workers.dev/data/sample/frames/g.jpg');
+    expect(sequence.overlayUrl).toBe('https://horizonte.gabriel-olius.workers.dev/data/sample/overlay.png');
     expect(sequence.kind).toBe('sample');
   });
 });
