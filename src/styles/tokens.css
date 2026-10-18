@@ -1,0 +1,27 @@
+/*
+ * Visual identity shared with the portfolio (copied, not imported: each
+ * repository stays independent). Keep in sync with portfolio/src/styles/global.css.
+ */
+:root {
+  --color-bg: #fbfaf7;
+  --color-surface: #ffffff;
+  --color-text: #1b2128;
+  --color-muted: #55606c;
+  --color-border: #dedad2;
+  --color-accent: #0b6782;
+  --color-accent-strong: #084f64;
+  --color-accent-soft: #e3f0f3;
+  --color-warning-bg: #fff7e0;
+  --color-warning-border: #c99a14;
+  --color-warning-text: #6b4f00;
+  --color-danger-bg: #fdecea;
+  --color-danger-border: #b3261e;
+  --color-danger-text: #7a1a14;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --radius: 10px;
+  --max-width: 80rem;
+  --gutter: clamp(1rem, 3vw, 2rem);
+
+  color-scheme: light;
+}

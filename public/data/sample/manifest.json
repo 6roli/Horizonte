@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "kind": "sample",
+  "generatedAt": "2026-10-18T14:01:40Z",
+  "source": {
+    "provider": "EUMETSAT",
+    "service": "EUMETView Web Map Service (WMS 1.3.0)",
+    "endpoint": "https://view.eumetsat.int/geoserver/wms",
+    "licence": "CC BY 4.0 (EUMETSAT Core data: Advanced Image Products)",
+    "attribution": "Contains modified EUMETSAT Meteosat data 2026"
+  },
+  "region": {
+    "name": "Spain and the western Mediterranean",
+    "bbox": {
+      "west": -11,
+      "south": 34,
+      "east": 13,
+      "north": 45
+    },
+    "crs": "EPSG:4326",
+    "width": 800,
+    "height": 367
+  },
+  "overlay": "overlay.png",
+  "layerIds": [
+    "geocolour",
+    "ir105"
+  ],
+  "frames": [
+    {
+      "time": "2026-10-18T06:20:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T0620Z.jpg",
+        "ir105": "frames/ir105_20261018T0620Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T06:40:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T0640Z.jpg",
+        "ir105": "frames/ir105_20261018T0640Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T07:00:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T0700Z.jpg",
+        "ir105": "frames/ir105_20261018T0700Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T07:20:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T0720Z.jpg",
+        "ir105": "frames/ir105_20261018T0720Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T07:40:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T0740Z.jpg",
+        "ir105": "frames/ir105_20261018T0740Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T08:00:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T0800Z.jpg",
+        "ir105": "frames/ir105_20261018T0800Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T08:20:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T0820Z.jpg",
+        "ir105": "frames/ir105_20261018T0820Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T08:40:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T0840Z.jpg",
+        "ir105": "frames/ir105_20261018T0840Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T09:00:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T0900Z.jpg",
+        "ir105": "frames/ir105_20261018T0900Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T09:20:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T0920Z.jpg",
+        "ir105": "frames/ir105_20261018T0920Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T09:40:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T0940Z.jpg",
+        "ir105": "frames/ir105_20261018T0940Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T10:00:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T1000Z.jpg",
+        "ir105": "frames/ir105_20261018T1000Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T10:20:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T1020Z.jpg",
+        "ir105": "frames/ir105_20261018T1020Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T10:40:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T1040Z.jpg",
+        "ir105": "frames/ir105_20261018T1040Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T11:00:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T1100Z.jpg",
+        "ir105": "frames/ir105_20261018T1100Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T11:20:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T1120Z.jpg",
+        "ir105": "frames/ir105_20261018T1120Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T11:40:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T1140Z.jpg",
+        "ir105": "frames/ir105_20261018T1140Z.jpg"
+      }
+    },
+    {
+      "time": "2026-10-18T12:00:00Z",
+      "images": {
+        "geocolour": "frames/geocolour_20261018T1200Z.jpg",
+        "ir105": "frames/ir105_20261018T1200Z.jpg"
+      }
+    }
+  ],
+  "note": "Fixed historical example: the morning of 18 October 2026, from night into daylight. It is included so the app can be explored when live data is unavailable. It does not show current conditions."
+}

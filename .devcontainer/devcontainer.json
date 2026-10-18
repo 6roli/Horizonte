@@ -1,0 +1,20 @@
+{
+  // Works in GitHub Codespaces (browser or VS Code) and in VS Code Dev Containers locally.
+  "name": "horizonte",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24-bookworm",
+  // Installs dependencies and downloads a fresh live sequence (public data, no account needed).
+  "postCreateCommand": "npm ci && (npm run fetch:live || echo 'Live fetch failed; the app will use the bundled sample.')",
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": { "label": "Vite dev server", "onAutoForward": "openPreview" }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["vitest.explorer", "esbenp.prettier-vscode", "editorconfig.editorconfig"]
+    },
+    "codespaces": {
+      "openFiles": ["README.md", "src/config/app.ts"]
+    }
+  },
+  "hostRequirements": { "cpus": 2 }
+}

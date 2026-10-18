@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- The app name is provisional: keep in sync with APP_NAME in src/config/app.ts -->
+    <title>Horizonte — Meteosat imagery for Spain and the western Mediterranean</title>
+    <meta
+      name="description"
+      content="Recent Meteosat satellite image sequences over Spain and the western Mediterranean, with explicit observation times, sources and limitations."
+    />
+    <meta name="theme-color" content="#fbfaf7" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#viewer">Skip to the viewer</a>
+
+    <header class="app-header">
+      <div class="container app-header__inner">
+        <div class="brand">
+          <span class="brand__mark" aria-hidden="true"></span>
+          <div>
+            <p class="brand__name" data-app-name>Horizonte</p>
+            <p class="brand__tagline" data-text="tagline"></p>
+          </div>
+        </div>
+        <a class="back-link" id="portfolio-link" href="#">← <span data-text="backToPortfolio"></span></a>
+      </div>
+    </header>
+
+    <main id="viewer" class="container">
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+
+      <div class="viewer" id="viewer-body" hidden>
+        <section class="map-panel" aria-labelledby="time-heading">
+          <div class="time-strip">
+            <div>
+              <h1 id="time-heading" class="time-strip__label" data-text="observedAt"></h1>
+              <p class="time-strip__utc" id="time-utc"></p>
+              <p class="time-strip__local" id="time-local"></p>
+              <p class="time-strip__local" id="time-viewer" hidden></p>
+            </div>
+            <p class="kind-badge" id="kind-badge"></p>
+          </div>
+
+          <div class="map-wrap">
+            <div id="map" class="map" role="region" tabindex="0"></div>
+            <p class="frame-warning" id="frame-warning" hidden></p>
+          </div>
+          <output class="cursor" id="cursor" aria-live="off"></output>
+
+          <div class="controls" role="group" aria-label="Playback">
+            <button type="button" class="icon-button" id="prev-button"><span aria-hidden="true">⏮</span></button>
+            <button type="button" class="play-button" id="play-button"></button>
+            <button type="button" class="icon-button" id="next-button"><span aria-hidden="true">⏭</span></button>
+            <label class="timeline">
+              <span class="visually-hidden" data-text="timeline"></span>
+              <input type="range" id="timeline" min="0" max="0" step="1" value="0" />
+            </label>
+            <label class="speed">
+              <span data-text="speed"></span>
+              <select id="speed">
+                <option value="slow" data-text="speedSlow"></option>
+                <option value="normal" data-text="speedNormal" selected></option>
+                <option value="fast" data-text="speedFast"></option>
+              </select>
+            </label>
+          </div>
+          <p class="frame-count muted" id="frame-count"></p>
+        </section>
+
+        <aside class="info-panel">
+          <fieldset class="layers">
+            <legend data-text="layer"></legend>
+            <div id="layer-options"></div>
+          </fieldset>
+
+          <section class="layer-explanation" aria-live="polite">
+            <h2 id="layer-title"></h2>
+            <p id="layer-explanation"></p>
+            <p id="layer-caveat" class="caveat" hidden></p>
+          </section>
+
+          <section>
+            <h2 data-text="source"></h2>
+            <dl class="facts" id="source-facts"></dl>
+          </section>
+        </aside>
+      </div>
+
+      <p class="not-official" data-text="notOfficial"></p>
+
+      <article class="method" aria-labelledby="method-title">
+        <h2 id="method-title">About these images</h2>
+
+        <h3>Observations, estimates and forecasts</h3>
+        <p>
+          An <strong>observation</strong> is what an instrument measured at a given time. An
+          <strong>estimate</strong> is a quantity derived from observations with a model or algorithm, such as rainfall
+          rate from satellite data. A <strong>forecast</strong> predicts the future. Everything shown in this version of
+          Horizonte is an observation from Meteosat, turned into an image. There are no estimates, forecasts, detections or
+          warnings.
+        </p>
+
+        <h3>Where the images come from</h3>
+        <p>
+          The images come from EUMETSAT, the European operational satellite agency, through its public
+          <a href="https://view.eumetsat.int">EUMETView</a> Web Map Service. They are taken by the Flexible Combined
+          Imager on Meteosat-12 (MTG-I1), which scans the full Earth disc every 10 minutes from a geostationary orbit
+          about 36,000 km above 0° longitude. EUMETSAT classifies these image products as Core data, free to reuse
+          under the CC BY 4.0 licence with attribution.
+        </p>
+
+        <h3>How Horizonte prepares them</h3>
+        <ol>
+          <li>Once an hour, an automated job asks EUMETView which observation times are available.</li>
+          <li>
+            It downloads a crop of the region for a few hours of observations (one frame every 20 minutes) for each
+            layer, plus a coastline and border overlay.
+          </li>
+          <li>It checks every file and records the observation times in a manifest, then publishes the files as a static website.</li>
+          <li>Your browser only downloads these prepared images. Visiting the page sends no requests to EUMETSAT.</li>
+        </ol>
+
+        <h3>Limitations</h3>
+        <ul>
+          <li>
+            These are <strong>images for viewing, not measurements</strong>. Colours are stretched and compressed
+            (JPEG), so pixel values cannot be converted back to temperatures or reflectances. Scientific analysis needs
+            the original numerical data, available from the EUMETSAT Data Store.
+          </li>
+          <li>
+            The time shown is the nominal start of the scan. Each full-disc scan takes about 10 minutes, so places
+            in the image were observed a few minutes apart.
+          </li>
+          <li>
+            Images are reprojected to a latitude/longitude grid. The satellite sees this region at a slant from above
+            the equator, so high clouds appear shifted away from it, towards the north, by roughly 10 km or more
+            (parallax).
+          </li>
+          <li>
+            Updates are hourly and EUMETView publishes images with a delay, so the newest frame is normally 20 to 90
+            minutes old. Older data is flagged on the page.
+          </li>
+          <li>The region does not include the Canary Islands.</li>
+        </ul>
+      </article>
+    </main>
+
+    <footer class="app-footer">
+      <div class="container app-footer__inner">
+        <p id="attribution"></p>
+        <p>
+          <span data-app-name>Horizonte</span> is a project by
+          <a id="portfolio-footer-link" href="#">Gabriel Olius</a>. Static site, no tracking, no cookies.
+        </p>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

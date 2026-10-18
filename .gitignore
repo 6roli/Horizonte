@@ -1,0 +1,28 @@
+node_modules/
+dist/
+.wrangler/
+
+# Live frames are produced by CI every hour and never committed.
+# Only the small historical sample in public/data/sample/ is versioned.
+public/data/live/
+public/data/*.tmp/
+
+# Secrets and local environment
+.env
+.env.*
+.dev.vars
+
+# Raw satellite files must never enter the repository.
+*.nc
+*.nat
+*.grb
+*.grb2
+*.h5
+*.hdf
+*.zip
+*.tif
+*.tiff
+
+.DS_Store
+Thumbs.db
+*.log
