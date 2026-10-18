@@ -80,7 +80,7 @@ npm run dev       # http://localhost:5173 — reloads on save
 | `npm run typecheck` | TypeScript check (app, scripts and tests) |
 | `npm run build` | Type check + production build into `dist/` |
 | `npm run preview` | Serve `dist/` locally |
-| `npm run verify` | Type check + tests + build — the same command Cloudflare runs |
+| `npm run verify` | Type check + tests + build — same as `npm run build` |
 | `npm run make:sample -- --end 2026-10-18T12:00:00Z --note "…"` | Regenerate the historical sample (`--width`, default 800) |
 
 No secrets or `.env` file are needed: all data sources are public.
@@ -91,21 +91,23 @@ To change the region, layers, sequence length or thresholds, edit `src/config/ap
 
 ## Publish
 
-Cloudflare Pages is connected to this GitHub repository (Git integration):
+Cloudflare (Workers static assets, Free plan) is connected to this GitHub repository through its Git integration:
 
-- push to `main` → Cloudflare runs `npm run verify`; if every check passes, the new version goes live;
+- push to `main` → Cloudflare runs `npm run build` (all checks + build); if every check passes, the new version goes live;
 - push to another branch or open a pull request → a preview URL, shown in GitHub next to the commit;
 - if a check fails, nothing is deployed and the previous version stays online.
 
-Cloudflare Pages project settings:
+Cloudflare project settings (*Workers & Pages → project → Settings → Build*):
 
 | Setting | Value |
 |---|---|
-| Framework preset | None |
-| Build command | `npm run verify` |
-| Build output directory | `dist` |
+| Build command | `npm run build` (runs every check before building) |
+| Deploy command | `npx wrangler deploy` |
+| Non-production branch deploy command | `npx wrangler versions upload` (preview URLs) |
 | Production branch | `main` |
-| Node.js version | from `.nvmrc` (24) |
+
+`wrangler.jsonc` tells Cloudflare the site is **only static files** in `dist/`: no Worker code and no server.
+Static requests are free and unlimited. Do not let Wrangler or Astro add the `@astrojs/cloudflare` adapter; it is not needed.
 
 `public/_headers` sets security headers (the Content-Security-Policy allows images only from this site and
 `view.eumetsat.int`) and caching.

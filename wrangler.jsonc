@@ -1,0 +1,13 @@
+// Cloudflare deployment settings. The app is purely static: Cloudflare only
+// serves the files in dist/ (no Worker code, no server). Static requests are free.
+{
+  "$schema": "https://unpkg.com/wrangler@4.147.0/config-schema.json",
+  // Must match the Worker name in the Cloudflare dashboard.
+  "name": "horizonte",
+  "compatibility_date": "2026-10-18",
+  "assets": {
+    "directory": "./dist",
+    // Unknown addresses show our own 404 page.
+    "not_found_handling": "404-page"
+  }
+}
