@@ -1,0 +1,156 @@
+/* Hub home page (/). Shared rules are in base.css. */
+
+.hero {
+  padding-block: clamp(3rem, 9vw, 6.5rem) clamp(2rem, 5vw, 3.5rem);
+}
+
+.hero::before {
+  height: 36rem;
+}
+
+.hero__title {
+  margin: 0 0 1.1rem;
+  font-size: clamp(3rem, 11vw, 6rem);
+  letter-spacing: -0.045em;
+  font-weight: 500;
+  background: linear-gradient(90deg, var(--color-text) 0%, var(--color-text) 45%, color-mix(in srgb, var(--accent) 70%, white) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero__intro {
+  margin: 0;
+  max-width: 40rem;
+  font-size: clamp(1.1rem, 2.3vw, 1.35rem);
+  line-height: 1.55;
+  color: var(--color-muted);
+}
+
+/* Module cards ----------------------------------------------------------------- */
+
+.module-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.module-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition:
+    border-color 0.2s,
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.module-card:hover,
+.module-card:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  box-shadow: 0 30px 80px -40px color-mix(in srgb, var(--accent-2) 70%, transparent);
+  transform: translateY(-2px);
+}
+
+.module-card__preview {
+  position: relative;
+  aspect-ratio: 24 / 11;
+  background: #0a1420;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.module-card__preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Fade the preview into the card. */
+.module-card__preview::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, rgb(12 14 19 / 0.85));
+}
+
+.module-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem 1.4rem 1.4rem;
+}
+
+.module-card h3 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.module-card__link {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+/* The whole card is clickable through the title link. */
+.module-card__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+}
+
+.module-card p {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.module-card__source {
+  font-size: 0.88rem;
+}
+
+.module-card__open {
+  margin-top: auto;
+  align-self: flex-start;
+  padding: 0.45rem 1.1rem;
+  border-radius: 999px;
+  background: #fff;
+  color: #07080b;
+  font-weight: 500;
+  font-size: 0.93rem;
+}
+
+/* Principles ------------------------------------------------------------------- */
+
+.principles h2 {
+  margin: 3.5rem 0 1rem;
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+}
+
+.principle-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.principle-grid li {
+  padding: 1.1rem 1.25rem;
+}
+
+.principle-grid h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.principle-grid p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.95rem;
+}

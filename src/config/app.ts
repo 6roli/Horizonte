@@ -1,6 +1,6 @@
 /**
  * Central configuration. The app name is provisional: change APP_NAME here
- * (and the <title> in index.html) to rename the whole interface.
+ * (and the <title> of each HTML page) to rename the whole interface.
  *
  * This file must stay free of DOM code: it is also imported by the Node
  * scripts in /scripts.
@@ -11,6 +11,8 @@ export const APP_NAME = 'Horizonte';
 /** Link back to the portfolio. Update when a custom domain is connected. */
 export const PORTFOLIO_URL = 'https://portfolio.gabriel-olius.workers.dev';
 export const PORTFOLIO_LABEL = 'Gabriel Olius — portfolio';
+/** Horizonte's page in the portfolio, linked from the top bar of every module. */
+export const PORTFOLIO_PROJECT_URL = `${PORTFOLIO_URL}/projects/horizonte/`;
 
 /** Time zone shown next to UTC. Peninsular Spain and the Balearic Islands. */
 export const LOCAL_TIME_ZONE = 'Europe/Madrid';
@@ -116,3 +118,4 @@ export const FRESHNESS = {
  * 8 concurrent requests per user; staying lower keeps the app a polite client.
  */
 export const MAX_PARALLEL_IMAGE_REQUESTS = 3;
+

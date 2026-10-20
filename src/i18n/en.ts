@@ -3,8 +3,8 @@
  * (enforced by the `Strings` type); then select it in src/i18n/index.ts.
  */
 export const en = {
-  tagline: 'Meteosat imagery · Spain and the western Mediterranean',
   backToPortfolio: 'Portfolio',
+  modulesNav: 'Horizonte modules',
 
   loading: 'Loading the latest image sequence…',
   errorTitle: 'The images could not be loaded.',
@@ -53,6 +53,9 @@ export const en = {
 
   mapLabel: 'Satellite image map. Use the controls below to change the time.',
   cursor: 'Cursor',
+
+  hubData: 'Data: {source}',
+  hubOpen: 'Open →',
 
   notOfficial:
     'Horizonte shows satellite observations only. It does not issue warnings or forecasts. For official warnings in Spain see AEMET (aemet.es) and Meteoalarm (meteoalarm.org).',

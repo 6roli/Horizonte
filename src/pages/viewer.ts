@@ -1,33 +1,33 @@
 /**
- * Entry point: wires data loading, the map and the controls together.
+ * Satellite viewer page (/viewer/): wires data loading, the map and the controls together.
  * Data access lives in src/data, presentation helpers in src/ui.
  */
-import './styles/tokens.css';
-import './styles/app.css';
+import '@fontsource-variable/inter';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/viewer.css';
 import {
-  APP_NAME,
   DEFAULT_LAYER_ID,
   LAYERS,
   LOCAL_TIME_ZONE,
   MAX_PARALLEL_IMAGE_REQUESTS,
-  PORTFOLIO_LABEL,
-  PORTFOLIO_URL,
   type InformationKind,
   type LayerDefinition,
-} from './config/app.ts';
-import { assessFreshness, formatAge, type FreshnessReport } from './data/freshness.ts';
-import { loadSequence, type LoadedSequence } from './data/load.ts';
-import { ImagePreloader } from './data/preload.ts';
-import type { Sequence } from './data/sequence.ts';
-import { t } from './i18n/index.ts';
-import type { StringKey } from './i18n/en.ts';
-import { createSatelliteMap, type SatelliteMap } from './ui/map.ts';
-import { clampIndex, nextPlayableIndex, previousPlayableIndex, SPEEDS, type Speed } from './ui/playback.ts';
-import { formatInZone, formatUtc, sameOffset, viewerTimeZone } from './ui/time-format.ts';
+} from '../config/app.ts';
+import { assessFreshness, formatAge, type FreshnessReport } from '../data/freshness.ts';
+import { loadSequence, type LoadedSequence } from '../data/load.ts';
+import { ImagePreloader } from '../data/preload.ts';
+import type { Sequence } from '../data/sequence.ts';
+import { t } from '../i18n/index.ts';
+import type { StringKey } from '../i18n/en.ts';
+import { createSatelliteMap, type SatelliteMap } from '../ui/map.ts';
+import { clampIndex, nextPlayableIndex, previousPlayableIndex, SPEEDS, type Speed } from '../ui/playback.ts';
+import { formatInZone, formatUtc, sameOffset, viewerTimeZone } from '../ui/time-format.ts';
+import { mountTopBar } from '../ui/topbar.ts';
 
 function byId<T extends HTMLElement>(id: string): T {
   const element = document.getElementById(id);
-  if (!element) throw new Error(`Missing element #${id} in index.html`);
+  if (!element) throw new Error(`Missing element #${id} in viewer/index.html`);
   return element as T;
 }
 
@@ -61,19 +61,12 @@ const KIND_LABELS: Record<InformationKind, StringKey> = {
   forecast: 'kindForecast',
 };
 
-/** Fills static text marked with data-text and the centralised app name. */
+/** Fills static text marked with data-text and the shared top bar. */
 function applyStaticText(): void {
   document.querySelectorAll<HTMLElement>('[data-text]').forEach((element) => {
     element.textContent = t(element.dataset.text as StringKey);
   });
-  document.querySelectorAll<HTMLElement>('[data-app-name]').forEach((element) => {
-    element.textContent = APP_NAME;
-  });
-  for (const id of ['portfolio-link', 'portfolio-footer-link']) {
-    const link = byId<HTMLAnchorElement>(id);
-    link.href = PORTFOLIO_URL;
-  }
-  byId<HTMLAnchorElement>('portfolio-link').setAttribute('aria-label', PORTFOLIO_LABEL);
+  mountTopBar('viewer');
   elements.prev.setAttribute('aria-label', t('previous'));
   elements.next.setAttribute('aria-label', t('next'));
   elements.prev.title = t('previous');
