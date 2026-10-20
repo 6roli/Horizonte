@@ -1,0 +1,365 @@
+/* Weather now (/weather/). Shared rules are in base.css. */
+
+.updated {
+  margin: 0.9rem 0 0;
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.updated:empty {
+  display: none;
+}
+
+/* Summary tiles ------------------------------------------------------------------ */
+
+.tiles {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.tile {
+  padding: 1rem 1.15rem 1.1rem;
+}
+
+.tile p {
+  margin: 0;
+}
+
+.tile__label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.tile__value {
+  margin: 0.35rem 0 0.2rem !important;
+  font-size: clamp(1.7rem, 4vw, 2.2rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.tile__note {
+  font-size: 0.86rem;
+  color: var(--color-muted);
+}
+
+.tile--accent {
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  background:
+    radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent 60%),
+    linear-gradient(180deg, var(--color-surface-2), var(--color-surface));
+}
+
+.tile--accent .tile__value {
+  color: var(--accent-text);
+}
+
+/* Map ---------------------------------------------------------------------------- */
+
+.map-card {
+  padding: 1rem;
+}
+
+.map-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin: 0.15rem 0.25rem 0.85rem;
+}
+
+.map-card h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.legend__bar {
+  width: 9rem;
+  height: 0.5rem;
+  border-radius: 999px;
+}
+
+.weather-map-wrap {
+  position: relative;
+}
+
+.weather-map,
+.weather-map.leaflet-container {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  min-height: 17rem;
+  max-height: 70vh;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  background:
+    radial-gradient(60% 80% at 30% 40%, color-mix(in srgb, var(--accent-2) 14%, transparent), transparent 70%),
+    #070b14;
+}
+
+.inset {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  z-index: 500;
+  width: clamp(8.5rem, 22%, 13rem);
+  padding: 0.3rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border-strong);
+  background: rgb(7 11 20 / 0.85);
+}
+
+.inset__label {
+  margin: 0 0 0.2rem 0.25rem;
+  font-size: 0.72rem;
+  color: var(--color-muted);
+}
+
+.inset__map,
+.inset__map.leaflet-container {
+  width: 100%;
+  aspect-ratio: 52 / 20;
+  border-radius: 9px;
+  background: #070b14;
+}
+
+/* On phones the inset would hide the south-west of the mainland: put it under the map. */
+@media (max-width: 40rem) {
+  .map-card {
+    padding: 0.75rem;
+  }
+
+  .weather-map,
+  .weather-map.leaflet-container {
+    aspect-ratio: 5 / 4;
+    max-height: none;
+  }
+
+  .inset {
+    position: static;
+    width: min(100%, 16rem);
+    margin-top: 0.6rem;
+  }
+}
+
+.map-card__note {
+  margin: 0.75rem 0.25rem 0.1rem;
+  font-size: 0.86rem;
+}
+
+/* Temperature markers ------------------------------------------------------------ */
+
+.temp-marker {
+  background: none;
+  border: 0;
+}
+
+.temp-marker__label {
+  display: inline-block;
+  transform: translate(-50%, -50%);
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: var(--color-surface-2);
+  color: #07080b;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.45),
+    0 4px 12px rgb(0 0 0 / 0.45);
+}
+
+.leaflet-marker-icon:focus-visible .temp-marker__label,
+.temp-marker:focus-visible .temp-marker__label {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.leaflet-tooltip.temp-tooltip {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.5);
+  font-size: 0.82rem;
+}
+
+.leaflet-tooltip-top.temp-tooltip::before {
+  border-top-color: var(--color-surface-2);
+}
+
+/* Table -------------------------------------------------------------------------- */
+
+.table-section h2 {
+  margin: 2.5rem 0 0.3rem;
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+}
+
+.table-section > p {
+  margin: 0 0 1rem;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.capitals {
+  width: 100%;
+  min-width: 44rem;
+  border-collapse: collapse;
+  font-size: 0.93rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.capitals th,
+.capitals td {
+  padding: 0.55rem 0.9rem;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.capitals thead th {
+  position: sticky;
+  top: 0;
+  background: var(--color-surface-2);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.capitals tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.capitals tbody tr:hover {
+  background: rgb(255 255 255 / 0.025);
+}
+
+.capitals tbody tr.is-selected {
+  background: var(--accent-soft);
+}
+
+.capitals tbody th {
+  font-weight: 500;
+}
+
+.capitals .num {
+  text-align: right;
+}
+
+.sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.1rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.sort-button:hover {
+  color: var(--color-text);
+}
+
+.sort-button__arrow::after {
+  content: '↕';
+  opacity: 0.4;
+}
+
+[aria-sort='ascending'] .sort-button {
+  color: var(--accent-text);
+}
+
+[aria-sort='ascending'] .sort-button__arrow::after {
+  content: '↑';
+  opacity: 1;
+}
+
+[aria-sort='descending'] .sort-button {
+  color: var(--accent-text);
+}
+
+[aria-sort='descending'] .sort-button__arrow::after {
+  content: '↓';
+  opacity: 1;
+}
+
+.temp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.temp-chip::before {
+  content: '';
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--chip, transparent);
+}
+
+.spark-cell {
+  line-height: 0;
+}
+
+.spark polyline {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.rain--wet {
+  color: var(--accent-text);
+  font-weight: 500;
+}
+
+.obs__temp {
+  display: block;
+  white-space: nowrap;
+}
+
+.obs__meta {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.method ul {
+  padding-left: 1.2rem;
+}
+
+.method li {
+  margin-bottom: 0.6rem;
+}

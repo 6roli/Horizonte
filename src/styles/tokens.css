@@ -1,27 +1,40 @@
 /*
- * Visual identity shared with the portfolio (copied, not imported: each
- * repository stays independent). Keep in sync with portfolio/src/styles/global.css.
+ * Visual identity shared with the portfolio: dark "liquid" look (copied, not
+ * imported: each repository stays independent). Keep in sync with
+ * portfolio/src/styles/global.css. Horizonte uses the portfolio's "sky" theme:
+ * only --accent and --accent-2 differ between projects.
  */
 :root {
-  --color-bg: #fbfaf7;
-  --color-surface: #ffffff;
-  --color-text: #1b2128;
-  --color-muted: #55606c;
-  --color-border: #dedad2;
-  --color-accent: #0b6782;
-  --color-accent-strong: #084f64;
-  --color-accent-soft: #e3f0f3;
-  --color-warning-bg: #fff7e0;
-  --color-warning-border: #c99a14;
-  --color-warning-text: #6b4f00;
-  --color-danger-bg: #fdecea;
-  --color-danger-border: #b3261e;
-  --color-danger-text: #7a1a14;
+  --color-bg: #050608;
+  --color-surface: #0c0e13;
+  --color-surface-2: #13161d;
+  --color-text: #f2f4f7;
+  --color-muted: #98a1b0;
+  --color-faint: #5d6574;
+  --color-border: rgb(255 255 255 / 0.09);
+  --color-border-strong: rgb(255 255 255 / 0.18);
 
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --radius: 10px;
+  /* "sky" theme: cold cyan to deep blue — satellites, atmosphere, ocean. */
+  --accent: #4cc9f0;
+  --accent-2: #4361ee;
+  --accent-soft: color-mix(in srgb, var(--accent) 14%, transparent);
+  --accent-text: color-mix(in srgb, var(--accent) 55%, white);
+
+  --color-warning-bg: rgb(250 204 21 / 0.07);
+  --color-warning-border: rgb(250 204 21 / 0.45);
+  --color-warning-text: #f3d77b;
+  --color-danger-bg: rgb(248 113 113 / 0.08);
+  --color-danger-border: rgb(248 113 113 / 0.5);
+  --color-danger-text: #fca5a5;
+
+  --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Consolas, monospace;
+
+  --radius: 14px;
+  --radius-lg: 22px;
   --max-width: 80rem;
-  --gutter: clamp(1rem, 3vw, 2rem);
+  --reading-width: 46rem;
+  --gutter: clamp(1rem, 4vw, 2rem);
 
-  color-scheme: light;
+  color-scheme: dark;
 }

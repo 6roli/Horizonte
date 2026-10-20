@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- The app name is provisional: keep in sync with APP_NAME in src/config/app.ts -->
+    <title>Weather now — Horizonte</title>
+    <meta
+      name="description"
+      content="Forecast for the current hour and the next 24 hours in Spain's 52 provincial capitals, next to the latest AEMET station observation and yesterday's forecast error."
+    />
+    <meta name="theme-color" content="#050608" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#weather">Skip to the weather data</a>
+
+    <header class="topbar" id="topbar">
+      <div class="container topbar__inner"><a class="brand" href="/">Horizonte</a></div>
+    </header>
+
+    <div class="page-header glow">
+      <div class="container">
+        <p class="eyebrow">Weather now</p>
+        <h1>Weather in Spain’s 52 provincial capitals</h1>
+        <p class="lead">
+          The forecast for this hour and the next 24, next to what the nearest AEMET station last measured — from the
+          hourly snapshot of the <a href="https://github.com/6roli/weather-warehouse">weather warehouse</a>.
+        </p>
+        <p class="updated muted" id="updated" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <main id="weather" class="container">
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+
+      <div id="weather-body" hidden>
+        <ul class="tiles" id="tiles" aria-label="Summary"></ul>
+
+        <section class="panel map-card" id="map" aria-labelledby="map-title">
+          <div class="map-card__head">
+            <h2 id="map-title">Forecast temperature now</h2>
+            <div class="legend" aria-hidden="true">
+              <span>0°</span>
+              <span class="legend__bar"></span>
+              <span>35°</span>
+            </div>
+          </div>
+          <div class="weather-map-wrap">
+            <div id="weather-map" class="weather-map" role="region" aria-label="Map of the capitals with their forecast temperature"></div>
+            <div class="inset">
+              <p class="inset__label">Canary Islands</p>
+              <div id="canary-map" class="inset__map" aria-label="Canary Islands inset map"></div>
+            </div>
+          </div>
+          <p class="map-card__note muted">
+            Each label is the Open-Meteo forecast for the current hour, rounded to whole degrees. Select a capital to find it
+            in the table.
+          </p>
+        </section>
+
+        <section class="table-section" aria-labelledby="table-title">
+          <h2 id="table-title">All capitals</h2>
+          <p class="muted">Select a column heading to sort. Times are Spanish local time.</p>
+          <div class="table-scroll" tabindex="0" role="region" aria-labelledby="table-title">
+            <table class="capitals">
+              <thead>
+                <tr>
+                  <th scope="col" data-sort="name" aria-sort="ascending">Capital</th>
+                  <th scope="col" data-sort="forecast" class="num">Forecast now</th>
+                  <th scope="col">Next 24 h</th>
+                  <th scope="col" data-sort="rain" class="num">Rain 24 h</th>
+                  <th scope="col" data-sort="observed">Last observation</th>
+                </tr>
+              </thead>
+              <tbody id="capital-rows"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <article class="method" aria-labelledby="about-title">
+        <h2 id="about-title">About these numbers</h2>
+        <ul>
+          <li>
+            <strong>Forecast</strong> values come from <a href="https://open-meteo.com">Open-Meteo</a>, issued every hour
+            for the coordinates of each capital. <strong>Observations</strong> come from the AEMET station linked to each
+            capital, often at an airport or on the outskirts, so they can differ from the city centre.
+          </li>
+          <li>
+            The <strong>forecast error</strong> is the mean absolute difference between yesterday’s forecasts (made 1 to 6
+            hours ahead) and what the stations measured. It is recomputed every day by the warehouse.
+          </li>
+          <li>
+            AEMET publishes observations with some delay, so the last observation is usually one or two hours old. Its time is
+            shown next to it.
+          </li>
+          <li>
+            Your browser downloads the snapshot directly from Hugging Face; Horizonte has no server. The warehouse code,
+            schedule and data model are on <a href="https://github.com/6roli/weather-warehouse">GitHub</a>.
+          </li>
+        </ul>
+        <p class="not-official">
+          Horizonte is not an official service and issues no warnings. For official forecasts and warnings in Spain see
+          <a href="https://www.aemet.es">AEMET</a> and <a href="https://meteoalarm.org">Meteoalarm</a>.
+        </p>
+      </article>
+    </main>
+
+    <footer class="app-footer">
+      <div class="container app-footer__inner">
+        <p>
+          Forecasts: <a href="https://open-meteo.com">Open-Meteo</a> (CC BY 4.0). Observations: Fuente:
+          <a href="https://www.aemet.es">AEMET</a>. Data prepared by the
+          <a href="https://github.com/6roli/weather-warehouse">weather warehouse</a>. Coastlines: Natural Earth.
+        </p>
+        <p>
+          <span data-app-name>Horizonte</span> is a project by
+          <a data-portfolio-link href="https://portfolio.gabriel-olius.workers.dev">Gabriel Olius</a>. Static site, no
+          tracking, no cookies.
+        </p>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/pages/weather.ts"></script>
+  </body>
+</html>

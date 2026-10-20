@@ -3,8 +3,8 @@
  * (enforced by the `Strings` type); then select it in src/i18n/index.ts.
  */
 export const en = {
-  tagline: 'Meteosat imagery · Spain and the western Mediterranean',
   backToPortfolio: 'Portfolio',
+  modulesNav: 'Horizonte modules',
 
   loading: 'Loading the latest image sequence…',
   errorTitle: 'The images could not be loaded.',
@@ -53,6 +53,32 @@ export const en = {
 
   mapLabel: 'Satellite image map. Use the controls below to change the time.',
   cursor: 'Cursor',
+
+  hubData: 'Data: {source}',
+  hubOpen: 'Open →',
+
+  weatherLoading: 'Loading the latest weather snapshot…',
+  weatherErrorTitle: 'The weather data could not be loaded.',
+  weatherErrorBody: 'Reason: {reason}. The page shows nothing rather than old or invented numbers.',
+  weatherStaleTitle: 'This snapshot is older than expected.',
+  weatherStaleBody: 'It was produced {age} ago; the warehouse normally updates every hour.',
+  weatherOutdatedTitle: 'Old data.',
+  weatherOutdatedBody: 'This snapshot was produced {age} ago. Do not use it to judge current conditions.',
+  weatherSkipped: '{count} malformed entries were left out.',
+  weatherUpdated: 'Snapshot produced {time} ({age} ago). Forecast issued {issued}.',
+  weatherTileCapitals: 'Capitals',
+  weatherTileCapitalsNote: 'Provincial capitals plus Ceuta and Melilla',
+  weatherTileObserved: 'With a station observation',
+  weatherTileObservedNote: 'Linked AEMET station reported a temperature',
+  weatherTileSkill: 'Forecast error, 1–6 h ahead',
+  weatherTileSkillNote: 'Mean absolute temperature error on {date}, {count} capitals',
+  weatherTileSkillMissing: 'Not available in this snapshot',
+  weatherTileAge: 'Data age',
+  weatherTileAgeNote: 'Produced {time}',
+  weatherSortBy: 'Sort by {column}',
+  weatherNoObservation: 'No observation',
+  weatherSparklineLabel: 'Next 24 hours: {min} to {max}',
+  weatherSparklineMissing: 'No hourly forecast',
 
   notOfficial:
     'Horizonte shows satellite observations only. It does not issue warnings or forecasts. For official warnings in Spain see AEMET (aemet.es) and Meteoalarm (meteoalarm.org).',

@@ -7,7 +7,10 @@
   "compatibility_date": "2026-10-18",
   "assets": {
     "directory": "./dist",
-    // Unknown addresses show our own 404 page.
+    // Unknown addresses show our own 404 page. /viewer and /weather are
+    // served from viewer/index.html and weather/index.html (trailing slash added).
     "not_found_handling": "404-page"
-  }
+  },
+  // Branch previews (Workers Builds, non-production branches) use the same settings.
+  "previews": {}
 }

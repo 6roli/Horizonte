@@ -1,12 +1,25 @@
+import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
-// Plain static build: index.html + bundled JS/CSS + everything in /public
-// (including the frames written by scripts/fetch-frames.ts).
+/**
+ * One HTML entry per page: the hub at / and one folder per module
+ * (see src/config/modules.ts). Everything in /public is copied as is.
+ */
+export const PAGES = {
+  hub: 'index.html',
+  viewer: 'viewer/index.html',
+  weather: 'weather/index.html',
+} as const;
+
+const root = import.meta.dirname;
+
 export default defineConfig({
   build: {
     outDir: 'dist',
-    // Leaflet is ~150 kB unminified; the warning threshold is fine as is.
     sourcemap: false,
+    rolldownOptions: {
+      input: Object.fromEntries(Object.entries(PAGES).map(([name, file]) => [name, resolve(root, file)])),
+    },
   },
   server: {
     port: 5173,

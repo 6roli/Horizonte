@@ -1,6 +1,6 @@
 /**
  * Central configuration. The app name is provisional: change APP_NAME here
- * (and the <title> in index.html) to rename the whole interface.
+ * (and the <title> of each HTML page) to rename the whole interface.
  *
  * This file must stay free of DOM code: it is also imported by the Node
  * scripts in /scripts.
@@ -11,6 +11,8 @@ export const APP_NAME = 'Horizonte';
 /** Link back to the portfolio. Update when a custom domain is connected. */
 export const PORTFOLIO_URL = 'https://portfolio.gabriel-olius.workers.dev';
 export const PORTFOLIO_LABEL = 'Gabriel Olius — portfolio';
+/** Horizonte's page in the portfolio, linked from the top bar of every module. */
+export const PORTFOLIO_PROJECT_URL = `${PORTFOLIO_URL}/projects/horizonte/`;
 
 /** Time zone shown next to UTC. Peninsular Spain and the Balearic Islands. */
 export const LOCAL_TIME_ZONE = 'Europe/Madrid';
@@ -116,3 +118,34 @@ export const FRESHNESS = {
  * 8 concurrent requests per user; staying lower keeps the app a polite client.
  */
 export const MAX_PARALLEL_IMAGE_REQUESTS = 3;
+
+/* Weather now (/weather/) ------------------------------------------------- */
+
+/**
+ * Public JSON written every hour by the weather warehouse
+ * (https://github.com/6roli/weather-warehouse). Hugging Face redirects it to
+ * its CDN (*.hf.co), so public/_headers must allow both hosts in connect-src.
+ */
+export const WEATHER_SNAPSHOT_URL =
+  'https://huggingface.co/buckets/groli/weather-warehouse/resolve/gold/web/snapshot.json';
+export const WEATHER_WAREHOUSE_REPO_URL = 'https://github.com/6roli/weather-warehouse';
+
+/** Attribution required by the data licences, shown on the page and the map. */
+export const WEATHER_ATTRIBUTION = 'Forecasts: Open-Meteo (CC BY 4.0). Observations: Fuente: AEMET.';
+
+/**
+ * The Canary Islands are outside REGION, so the weather map shows them in an
+ * inset. Its coastline image (public/overlay/coastlines-canarias-520.png) was
+ * rendered once by EUMETView for exactly this box, at 520×200 px.
+ */
+/**
+ * Initial view of the weather map: mainland Spain, the Balearic Islands, Ceuta
+ * and Melilla (the coastline image still covers the whole REGION).
+ */
+export const WEATHER_VIEW: Bbox = { west: -10, south: 34.6, east: 4.8, north: 44 };
+
+export const CANARY_INSET = {
+  bbox: { west: -18.4, south: 27.5, east: -13.2, north: 29.5 },
+  width: 520,
+  height: 200,
+} as const;
