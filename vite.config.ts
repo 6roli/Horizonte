@@ -8,6 +8,7 @@ import { defineConfig } from 'vite';
 export const PAGES = {
   hub: 'index.html',
   viewer: 'viewer/index.html',
+  weather: 'weather/index.html',
 } as const;
 
 const root = import.meta.dirname;

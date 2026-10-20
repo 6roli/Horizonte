@@ -37,5 +37,16 @@ export const HUB_MODULES: readonly HubModule[] = [
     tags: ['Observations', 'Every 20 min'],
     preview: '/images/modules/viewer.jpg',
   },
+  {
+    id: 'weather',
+    path: '/weather/',
+    navLabel: 'Weather',
+    title: 'Weather now',
+    summary:
+      'Forecast for the current hour and the next 24 hours in the 52 Spanish provincial capitals, next to the latest station observation and yesterday’s forecast error.',
+    dataSource: 'Open-Meteo · AEMET, via the weather warehouse',
+    tags: ['Forecasts', 'Observations', 'Hourly'],
+    preview: '/images/modules/weather.jpg',
+  },
 ];
 

@@ -1,10 +1,13 @@
 # Cloudflare response headers (https://developers.cloudflare.com/workers/static-assets/headers/)
-# Images and capabilities are loaded directly from EUMETSAT's EUMETView service.
+# Satellite images and capabilities come directly from EUMETSAT's EUMETView service.
+# The weather snapshot comes from Hugging Face, which redirects to its CDN (*.hf.co).
+# Referrer-Policy is no-referrer because Hugging Face answers 404 to requests that
+# carry a Referer from a *.workers.dev page (fetch() also sets it explicitly).
 /*
   X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
+  Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; img-src 'self' data: https://view.eumetsat.int; connect-src 'self' https://view.eumetsat.int; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: https://view.eumetsat.int; connect-src 'self' https://view.eumetsat.int https://huggingface.co https://*.hf.co; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
@@ -14,3 +17,6 @@
 
 /overlay/*
   Cache-Control: public, max-age=604800
+
+/images/*
+  Cache-Control: public, max-age=86400
