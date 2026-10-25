@@ -1,0 +1,110 @@
+{
+  "about": "Questions from the hand-written test set that the browser model (ONNX q4f16) answered correctly on the frozen snapshot of 2026-10-25. \"sql\" is the model output verbatim (after clean_prediction); \"today\" is the date the prompt gave it. Source: weather-text2sql results/qwen2.5-coder-1.5b/onnx_q4f16_handwritten.jsonl",
+  "examples": [
+    {
+      "id": "hw-01",
+      "lang": "es",
+      "question": "¿Necesitaré paraguas mañana en Bilbao? ¿Cuánta lluvia dan?",
+      "today": "2026-10-25",
+      "sql": "SELECT sum(precipitation_mm) FROM latest_forecast WHERE location_id = 'bilbao' AND CAST(valid_at AS DATE) = DATE '2026-10-25' + INTERVAL 1 DAY"
+    },
+    {
+      "id": "hw-04",
+      "lang": "es",
+      "question": "Ranking de las 5 ciudades donde más va a llover en los próximos 3 días",
+      "today": "2026-10-25",
+      "sql": "SELECT location_name, sum(precipitation_mm) AS precipitation_mm FROM latest_forecast GROUP BY location_name ORDER BY precipitation_mm DESC, location_name LIMIT 5"
+    },
+    {
+      "id": "hw-05",
+      "lang": "es",
+      "question": "¿Cuál será la ciudad más fría pasado mañana?",
+      "today": "2026-10-25",
+      "sql": "SELECT location_name, min(temperature_c) AS temperature_min_c FROM latest_forecast WHERE CAST(valid_at AS DATE) = DATE '2026-10-25' + INTERVAL 2 DAY GROUP BY location_name ORDER BY temperature_min_c ASC, location_name LIMIT 1"
+    },
+    {
+      "id": "hw-07",
+      "lang": "es",
+      "question": "Tiempo por horas para Granada hoy",
+      "today": "2026-10-25",
+      "sql": "SELECT valid_at, temperature_c, precipitation_mm, wind_speed_kmh, cloud_cover_pct FROM latest_forecast WHERE location_id = 'granada' AND CAST(valid_at AS DATE) = DATE '2026-10-25' ORDER BY valid_at"
+    },
+    {
+      "id": "hw-13",
+      "lang": "es",
+      "question": "¿A qué hora es la previsión que estáis usando?",
+      "today": "2026-10-25",
+      "sql": "SELECT issued_at FROM latest_forecast ORDER BY issued_at DESC, location_id LIMIT 1"
+    },
+    {
+      "id": "hw-14",
+      "lang": "es",
+      "question": "¿Va a hacer menos de 5 grados en alguna capital en los próximos días? ¿En cuáles?",
+      "today": "2026-10-25",
+      "sql": "SELECT location_name FROM latest_forecast GROUP BY location_name HAVING min(temperature_c) < 5"
+    },
+    {
+      "id": "hw-16",
+      "lang": "es",
+      "question": "¿Cuántos grados hizo ayer como máximo en Badajoz?",
+      "today": "2026-10-25",
+      "sql": "SELECT max(temperature_max_c) FROM daily_summary WHERE location_id = 'badajoz' AND date = DATE '2026-10-25' - INTERVAL 1 DAY"
+    },
+    {
+      "id": "hw-19",
+      "lang": "es",
+      "question": "¿Qué capital registró la mínima más baja anteayer?",
+      "today": "2026-10-25",
+      "sql": "SELECT location_id, temperature_min_c FROM daily_summary WHERE date = DATE '2026-10-25' - INTERVAL 2 DAY AND temperature_min_c IS NOT NULL ORDER BY temperature_min_c ASC, location_id LIMIT 1"
+    },
+    {
+      "id": "hw-27",
+      "lang": "es",
+      "question": "Error medio absoluto de la temperatura prevista con 24 h de antelación en Zaragoza",
+      "today": "2026-10-25",
+      "sql": "SELECT avg(abs(error_temperature_c)) FROM forecast_vs_observed WHERE location_id = 'zaragoza' AND lead_hours = 24"
+    },
+    {
+      "id": "hw-31",
+      "lang": "es",
+      "question": "Las 3 capitales más al norte de España",
+      "today": "2026-10-25",
+      "sql": "SELECT location_name, latitude FROM location_station ORDER BY latitude DESC, location_name LIMIT 3"
+    },
+    {
+      "id": "hw-32",
+      "lang": "es",
+      "question": "¿Qué estaciones están a más de 1000 metros de altura?",
+      "today": "2026-10-25",
+      "sql": "SELECT location_name, station_name, station_altitude_m FROM location_station WHERE station_altitude_m > 1000 ORDER BY station_altitude_m DESC"
+    },
+    {
+      "id": "hw-33",
+      "lang": "en",
+      "question": "What's the warmest it'll get in Malaga tomorrow?",
+      "today": "2026-10-25",
+      "sql": "SELECT max(temperature_c) FROM latest_forecast WHERE location_id = 'malaga' AND CAST(valid_at AS DATE) = DATE '2026-10-25' + INTERVAL 1 DAY"
+    },
+    {
+      "id": "hw-35",
+      "lang": "en",
+      "question": "How much rain fell in Zaragoza yesterday?",
+      "today": "2026-10-25",
+      "sql": "SELECT precipitation_sum_mm FROM daily_summary WHERE location_id = 'zaragoza' AND date = DATE '2026-10-25' - INTERVAL 1 DAY"
+    },
+    {
+      "id": "hw-36",
+      "lang": "en",
+      "question": "Rain in the next 12 hours in San Sebastian?",
+      "today": "2026-10-25",
+      "sql": "SELECT sum(precipitation_mm) FROM latest_forecast WHERE location_id = 'san-sebastian' AND lead_hours <= 12"
+    },
+    {
+      "id": "hw-40",
+      "lang": "es",
+      "question": "¿En qué capitales se pasará de 15 grados mañana?",
+      "today": "2026-10-25",
+      "sql": "SELECT DISTINCT location_name FROM latest_forecast WHERE CAST(valid_at AS DATE) = DATE '2026-10-25' + INTERVAL 1 DAY AND temperature_c > 15"
+    }
+  ]
+}
