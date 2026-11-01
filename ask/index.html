@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- The app name is provisional: keep in sync with APP_NAME in src/config/app.ts -->
+    <title>Ask the weather warehouse — Horizonte</title>
+    <meta
+      name="description"
+      content="Ask a question about the weather in Spain's 52 provincial capitals: a fine-tuned language model running in your browser writes the SQL, and DuckDB runs it on the live weather warehouse."
+    />
+    <meta name="theme-color" content="#050608" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#ask">Skip to the question box</a>
+
+    <header class="topbar" id="topbar">
+      <div class="container topbar__inner"><a class="brand" href="/">Horizonte</a></div>
+    </header>
+
+    <div class="page-header glow">
+      <div class="container">
+        <p class="eyebrow">Ask the warehouse</p>
+        <h1>Ask the weather warehouse</h1>
+        <p class="lead">
+          Ask about the weather in Spain’s 52 provincial capitals. A small language model, fine-tuned for this
+          warehouse, turns your question into SQL <strong>inside your browser</strong>, and DuckDB runs it on the live
+          data. No server, no account.
+        </p>
+        <p class="updated muted" id="data-status" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <main id="ask" class="container ask">
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+
+      <section class="panel ask-box" aria-labelledby="ask-title">
+        <h2 id="ask-title">Your question</h2>
+        <p class="muted" id="gpu-status" aria-live="polite"></p>
+        <button type="button" class="button" id="load-model" hidden></button>
+        <div class="progress" id="model-progress" hidden>
+          <div class="progress__bar" id="model-progress-bar"></div>
+        </div>
+        <form class="ask-form" id="ask-form" hidden>
+          <label for="question">Question (Spanish or English)</label>
+          <div class="ask-form__row">
+            <input
+              id="question"
+              name="question"
+              type="text"
+              autocomplete="off"
+              maxlength="300"
+              placeholder="¿Qué capital tendrá la máxima más alta mañana?"
+            />
+            <button type="submit" class="button" id="ask-button">Ask</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="answer" id="answer" aria-live="polite" hidden></section>
+
+      <section class="examples" aria-labelledby="examples-title">
+        <h2 id="examples-title">Examples</h2>
+        <p class="muted">
+          Questions the browser model answered correctly in a test run. Its SQL is saved, so these run instantly on
+          today’s data without downloading the model.
+        </p>
+        <ul class="chips" id="examples"></ul>
+      </section>
+
+      <section class="mistakes" aria-labelledby="mistakes-title">
+        <h2 id="mistakes-title">Where it goes wrong</h2>
+        <p class="muted">
+          The 10 questions of the hand-written test set that the browser model got wrong, with the query it wrote and
+          the right one. Most are a missing filter, a missing <code>DISTINCT</code> or a column taken from the wrong
+          table. They were measured with ONNX Runtime on a CPU; on your graphics card the arithmetic differs slightly,
+          so a few answers can come out differently.
+        </p>
+        <div id="mistakes"></div>
+      </section>
+
+      <article class="method" aria-labelledby="about-title">
+        <h2 id="about-title">About this model</h2>
+        <ul>
+          <li>
+            The model is <strong>Qwen2.5-Coder-1.5B-Instruct</strong> (Apache 2.0), fine-tuned with QLoRA on generated
+            questions about the warehouse tables. Code, data and evaluation:
+            <a href="https://github.com/6roli/weather-text2sql">weather-text2sql</a>; weights:
+            <a href="https://huggingface.co/groli/weather-text2sql-qwen2.5-coder-1.5b">Hugging Face</a>.
+          </li>
+          <li>
+            On 40 hand-written questions, a query counts as right when it returns the same data as the reference: the
+            base model gets <strong>7.5%</strong>, the fine-tuned model <strong>87.5%</strong>, and this browser version
+            (4-bit weights, 1.34 GB) <strong>75%</strong>. The compression costs some detail.
+          </li>
+          <li>
+            Everything runs on your device: the model with WebGPU through
+            <a href="https://huggingface.co/docs/transformers.js">transformers.js</a>, the SQL with
+            <a href="https://duckdb.org/docs/api/wasm/overview">DuckDB-WASM</a> over the warehouse’s public Parquet
+            files. Your questions are not sent anywhere.
+          </li>
+          <li>
+            It is a demo, not a source of truth: the SQL can be wrong while looking plausible. Always read the query.
+          </li>
+        </ul>
+        <p class="not-official">
+          Horizonte is not an official service and issues no warnings. For official forecasts and warnings in Spain see
+          <a href="https://www.aemet.es">AEMET</a> and <a href="https://meteoalarm.org">Meteoalarm</a>.
+        </p>
+      </article>
+    </main>
+
+    <footer class="app-footer">
+      <div class="container app-footer__inner">
+        <p>
+          Forecasts: <a href="https://open-meteo.com">Open-Meteo</a> (CC BY 4.0). Observations: Fuente:
+          <a href="https://www.aemet.es">AEMET</a>. Data prepared by the
+          <a href="https://github.com/6roli/weather-warehouse">weather warehouse</a>. Model based on Qwen2.5-Coder
+          (Apache 2.0).
+        </p>
+        <p>
+          <span data-app-name>Horizonte</span> is a project by
+          <a data-portfolio-link href="https://portfolio.gabriel-olius.workers.dev">Gabriel Olius</a>. Static site, no
+          tracking, no cookies.
+        </p>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/pages/ask.ts"></script>
+  </body>
+</html>

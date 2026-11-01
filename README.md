@@ -18,6 +18,7 @@ sources, times and limitations. *Horizonte* is a provisional name, defined once 
 | `/` | **Hub** | — | Introduction and one card per module |
 | `/viewer/` | **Satellite viewer** | EUMETSAT EUMETView WMS — Meteosat-12 (MTG-I1) FCI | The last 6 hours of GeoColour and infrared 10.5 µm images, with exact observation times and a labelled historical sample as fallback. Observations only. |
 | `/weather/` | **Weather now** | [Weather warehouse](https://github.com/6roli/weather-warehouse) snapshot: Open-Meteo forecasts + AEMET observations | Forecast now and for the next 24 h in the 52 provincial capitals, the latest AEMET station observation, yesterday's forecast error, a map and a sortable table. |
+| `/ask/` | **Ask the warehouse** | Weather warehouse gold tables (Parquet) + [fine-tuned Qwen2.5-Coder-1.5B](https://huggingface.co/groli/weather-text2sql-qwen2.5-coder-1.5b) | A question in Spanish or English becomes DuckDB SQL, written by a language model running in the browser (WebGPU), and runs on the live data. Saved examples work without the model; the model's known mistakes are listed. |
 
 Every page has the shared top bar: the Horizonte name (links to the hub), the module navigation and
 "← Portfolio" (Horizonte's page in the portfolio). Only modules that exist and work are listed — no placeholders.
@@ -35,6 +36,11 @@ Every page has the shared top bar: the Horizonte name (links to the hub), the mo
 | **Node.js + npm** | Your computer and Cloudflare's build server | Installs the tools above and runs the build. Node also runs `scripts/make-sample.ts` directly (built-in TypeScript support, Node 24+). |
 | **EUMETView WMS** (EUMETSAT) | EUMETSAT's servers | Renders the Meteosat images for the requested area and time. |
 | **Weather warehouse** snapshot | Hugging Face (public bucket) | Hourly JSON with forecasts and observations for the capitals, built by a separate project. |
+| **Weather warehouse** gold tables | Hugging Face (public bucket) | The Parquet tables the Ask module queries (a few MB). |
+| **transformers.js** (`@huggingface/transformers`, Apache 2.0) | Browser (Web Worker, WebGPU) | Runs the fine-tuned text-to-SQL model in the visitor's browser. |
+| **ONNX Runtime Web** (MIT) | Browser | The inference engine under transformers.js; its `.wasm` files come from jsDelivr. |
+| **DuckDB-WASM** (`@duckdb/duckdb-wasm`, MIT) | Browser (Web Worker) | Runs the model's SQL on the gold tables; its `.wasm` files come from jsDelivr and its Parquet extension from `extensions.duckdb.org`. |
+| **weather-text2sql model** ([Hugging Face](https://huggingface.co/groli/weather-text2sql-qwen2.5-coder-1.5b)) | Downloaded to the browser on request (1.34 GB, cached) | Qwen2.5-Coder-1.5B-Instruct (Apache 2.0) fine-tuned by [weather-text2sql](https://github.com/6roli/weather-text2sql), 4-bit ONNX. |
 | **Cloudflare** (Workers static assets) | Cloudflare | Builds the site on every push and serves the static files over HTTPS. |
 | **Python** | Not used here | Reserved for future analyses (see below). |
 
@@ -72,16 +78,41 @@ Browser opens /weather/
 uses `referrerPolicy: 'no-referrer'`, and `public/_headers` sets `Referrer-Policy: no-referrer` for the whole site.
 The Content-Security-Policy allows `connect-src https://huggingface.co https://*.hf.co` for the redirect.
 
+### Ask the warehouse (`/ask/`)
+
+```
+Browser opens /ask/
+  1. downloads the gold tables (latest_forecast, location_station, and the last 10 days of daily_summary and
+     forecast_vs_observed) with fetch (no referrer), registers them in DuckDB-WASM and creates one table per
+     name in the model's prompt
+  2. examples: the model's saved SQL from a test run (date moved to today) runs at once, no model needed
+  3. checks WebGPU with shader-f16; if available, offers to download the model (1.34 GB, cached by the browser)
+  4. on a question: a Web Worker builds the training prompt byte for byte (src/data/text2sql-prompt.ts),
+     generates greedily (max 200 tokens) and returns the SQL
+  5. the SQL is cleaned like in the evaluation, must be one SELECT/WITH, and runs in DuckDB; the page shows the
+     SQL, the result (first 200 rows) or DuckDB's error
+```
+
+Accuracy on 40 hand-written questions (execution accuracy, frozen snapshot): base model 7.5%, fine-tuned 87.5%,
+browser version (q4f16) 75%. `src/config/text2sql-mistakes.json` lists the 10 questions the browser model gets
+wrong, with the reference query; the page can run both on today's data.
+
+**CDN choices:** DuckDB's `.wasm` files (35–40 MB) and ONNX Runtime's (27 MB) are above Cloudflare's 25 MiB
+per-file limit, so both load from jsDelivr at the versions pinned in `package.json`. A small Vite plugin
+(`vite.config.ts`) drops the ONNX Runtime `.wasm` that Vite would otherwise copy into `dist/`.
+
 ### Code layout
 
 ```
 index.html                 Hub page (/)
 viewer/index.html          Satellite viewer page and its "About these images" text
 weather/index.html         Weather page and its "About these numbers" text
+ask/index.html             Ask the warehouse page and its "About this model" text
 vite.config.ts             One build entry per page (PAGES)
 src/config/app.ts          App name, portfolio links, region, layers, time zone, thresholds, data URLs
 src/config/modules.ts      The hub's module list: drives the hub cards and the top bar navigation
-src/pages/                 One entry script per page: hub.ts, viewer.ts, weather.ts
+src/config/text2sql-*.json Ask module: saved correct examples and known mistakes of the browser model
+src/pages/                 One entry script per page: hub.ts, viewer.ts, weather.ts, ask.ts
 src/data/                  Data access and validation (no DOM):
   wms.ts                     WMS helpers: time dimension parsing, URL building
   sequence.ts                Builds the satellite sequence (live from WMS, or from the sample manifest)
@@ -91,6 +122,11 @@ src/data/                  Data access and validation (no DOM):
   preload.ts                 Image preloading with a concurrency limit
   snapshot.ts                Schema, validation, age and sorting of the weather snapshot
   load-snapshot.ts           Fetches the weather snapshot (without a referrer)
+  text2sql-prompt.ts         The model's training prompt, ported from weather-text2sql (fixture-tested)
+  text2sql.ts                SQL cleaning and checks, example date moving, gold table URLs
+  text2sql-model.ts          WebGPU check and the page side of the model worker
+  text2sql-worker.ts         Web Worker: loads the model with transformers.js and generates SQL
+  warehouse-db.ts            DuckDB-WASM with the gold tables (browser only)
 src/ui/                    Presentation: top bar, Leaflet maps, playback, time and weather formatting
 src/styles/                tokens.css (design tokens shared with the portfolio), base.css (shared
                            components), one CSS file per page
@@ -106,7 +142,7 @@ docs/data-sources.md       Source evaluation: interfaces, formats, licence, cost
 ### Add a module
 
 1. Create `<module>/index.html` with `<header class="topbar" id="topbar">`, the page content and
-   `<script type="module" src="/src/pages/<module>.ts">` — no inline scripts: the CSP only allows `script-src 'self'`.
+   `<script type="module" src="/src/pages/<module>.ts">` — no inline scripts: the CSP does not allow them.
 2. Create `src/pages/<module>.ts`: import `@fontsource-variable/inter`, `tokens.css`, `base.css` and the module's
    own CSS, then call `mountTopBar('<module id>')`.
 3. Add the page to `PAGES` in `vite.config.ts` and an entry to `HUB_MODULES` in `src/config/modules.ts`
@@ -140,7 +176,7 @@ npm run dev       # http://localhost:5173 — reloads on save
 
 | Command | Purpose |
 |---|---|
-| `npm run dev` | Development server (`/`, `/viewer/`, `/weather/`) |
+| `npm run dev` | Development server (`/`, `/viewer/`, `/weather/`, `/ask/`) |
 | `npm test` | Unit tests |
 | `npm run typecheck` | TypeScript check (app, scripts and tests) |
 | `npm run build` | Type check + tests + production build into `dist/` |
@@ -172,12 +208,16 @@ Cloudflare project settings (*Workers & Pages → project → Settings → Build
 | Production branch | `main` |
 
 `wrangler.jsonc` tells Cloudflare the site is **only static files** in `dist/`: no Worker code and no server.
-Static requests are free and unlimited. `/viewer` and `/weather` are served from their `index.html` files (Cloudflare
+Static requests are free and unlimited. `/viewer`, `/weather` and `/ask` are served from their `index.html` files (Cloudflare
 adds the trailing slash). The empty `"previews": {}` block lets branch previews use the same settings.
 
 `public/_headers` sets security headers and caching. The Content-Security-Policy allows images only from this
-site and `view.eumetsat.int`, network requests only to this site, `view.eumetsat.int`, `huggingface.co` and
-`*.hf.co`, fonts only from this site and scripts only from this site. `Referrer-Policy: no-referrer` is required
+site and `view.eumetsat.int`; network requests only to this site, `view.eumetsat.int`, `huggingface.co`,
+`*.hf.co`, `cdn.jsdelivr.net` and `extensions.duckdb.org`; fonts only from this site; scripts only from this site
+and `cdn.jsdelivr.net`, plus WebAssembly compilation (`'wasm-unsafe-eval'`, not `'unsafe-eval'`); workers from
+this site and `blob:` (DuckDB's worker). It is one site-wide policy because a worker script gets the policy of
+its own URL (`/assets/…`), not of the page. To test it locally, serve `dist/` with
+`npx wrangler dev --compatibility-date=<a date wrangler supports>`: `npm run preview` ignores `_headers`. `Referrer-Policy: no-referrer` is required
 by Hugging Face (see the gotcha above).
 
 ## Data and licence
@@ -189,6 +229,7 @@ by Hugging Face (see the gotcha above).
 | AEMET OpenData observations (via the weather warehouse) | Weather now | AEMET reuse conditions: "Fuente: AEMET" |
 | Natural Earth coastlines and borders (rendered by EUMETView) | Both maps | Public domain |
 | Inter typeface | All pages | SIL Open Font License 1.1 |
+| Qwen2.5-Coder-1.5B-Instruct (base of the Ask model) | Ask the warehouse | Apache 2.0 |
 
 Under the EUMETSAT Data Policy, RGB composites and single-channel visualisations served via WMS are
 *Advanced Image Products*: **Core data, free and unrestricted under CC BY 4.0**, whatever their latency.
@@ -249,5 +290,12 @@ Weather now:
 - The snapshot is flagged when it is more than 2 hours old, and marked outdated after 6 hours.
 - Depends on the weather warehouse and Hugging Face; if the snapshot cannot be loaded, the page says so.
 
-Neither module is an official service. For warnings in Spain use [AEMET](https://www.aemet.es) and
+Ask the warehouse:
+
+- The SQL can be wrong while looking plausible (75% right on the hand-written test set); the page always shows it.
+- The live model needs WebGPU with `shader-f16` (recent Chrome or Edge on a desktop) and a 1.34 GB download;
+  phones and other browsers get the saved examples only.
+- Observations cover the last 10 days only (the tables loaded in the browser).
+
+No module is an official service. For warnings in Spain use [AEMET](https://www.aemet.es) and
 [Meteoalarm](https://meteoalarm.org).

@@ -46,7 +46,15 @@ describe('deployment settings', () => {
     expect(connect).toContain(new URL(WEATHER_SNAPSHOT_URL).origin);
     expect(connect).toContain('https://*.hf.co');
     expect(connect).toContain('https://view.eumetsat.int');
-    expect(csp).toMatch(/script-src 'self';/);
+    expect(csp).toMatch(/script-src 'self' 'wasm-unsafe-eval' https:\/\/cdn\.jsdelivr\.net;/);
+  });
+
+  it('allows what the Ask module needs and nothing broader', () => {
+    const csp = /Content-Security-Policy: (.*)$/m.exec(headers)?.[1] ?? '';
+    expect(/connect-src ([^;]*)/.exec(csp)?.[1]).toContain('https://cdn.jsdelivr.net');
+    expect(/worker-src ([^;]*)/.exec(csp)?.[1]?.trim()).toBe("'self' blob:");
+    expect(csp).not.toContain("'unsafe-eval'");
+    expect(csp).not.toMatch(/\*(?!\.hf\.co)/);
   });
 
   it('wrangler.jsonc serves dist/ and enables branch previews', () => {

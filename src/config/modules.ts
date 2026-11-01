@@ -48,5 +48,16 @@ export const HUB_MODULES: readonly HubModule[] = [
     tags: ['Forecasts', 'Observations', 'Hourly'],
     preview: '/images/modules/weather.jpg',
   },
+  {
+    id: 'ask',
+    path: '/ask/',
+    navLabel: 'Ask',
+    title: 'Ask the weather warehouse',
+    summary:
+      'Ask about the weather in the 52 capitals in Spanish or English: a fine-tuned language model writes the SQL in your browser and DuckDB runs it on the live data.',
+    dataSource: 'Weather warehouse · fine-tuned Qwen2.5-Coder-1.5B in your browser',
+    tags: ['Forecasts', 'Observations', 'AI model'],
+    preview: '/images/modules/ask.jpg',
+  },
 ];
 

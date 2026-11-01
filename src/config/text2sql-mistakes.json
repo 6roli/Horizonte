@@ -1,0 +1,85 @@
+{
+  "about": "The 10 hand-written questions the browser model (ONNX q4f16) got wrong on the frozen snapshot of 2026-10-25, with the reference query and the model's query verbatim (after clean_prediction). \"pytorchCorrect\" says whether the full-precision model got it right. Source: weather-text2sql results/qwen2.5-coder-1.5b/onnx_q4f16_handwritten.jsonl and finetuned_handwritten.jsonl",
+  "mistakes": [
+    {
+      "id": "hw-06",
+      "question": "¿Hay alguna capital con rachas por encima de 30 km/h mañana? Dime cuáles",
+      "reference": "SELECT DISTINCT location_name FROM latest_forecast WHERE CAST(valid_at AS DATE) = DATE '2026-10-25' + INTERVAL 1 DAY AND wind_gusts_kmh > 30",
+      "model": "SELECT location_name FROM latest_forecast WHERE CAST(valid_at AS DATE) = DATE '2026-10-25' + INTERVAL 1 DAY AND wind_gusts_kmh > 30",
+      "note": "Missing DISTINCT: each capital is repeated once per windy hour.",
+      "pytorchCorrect": true
+    },
+    {
+      "id": "hw-08",
+      "question": "¿En cuántas provincias va a llover mañana?",
+      "reference": "SELECT count(DISTINCT location_id) FROM latest_forecast WHERE CAST(valid_at AS DATE) = DATE '2026-10-25' + INTERVAL 1 DAY AND precipitation_mm > 0",
+      "model": "SELECT count(DISTINCT province) FROM latest_forecast WHERE CAST(valid_at AS DATE) = DATE '2026-10-25' + INTERVAL 1 DAY",
+      "note": "Dropped the rain filter: it counts every province, rain or not.",
+      "pytorchCorrect": true
+    },
+    {
+      "id": "hw-11",
+      "question": "Barcelona vs Valencia: ¿cuál tendrá la máxima más alta mañana?",
+      "reference": "SELECT location_name, max(temperature_c) AS temperature_max_c FROM latest_forecast WHERE location_id IN ('barcelona', 'valencia') AND CAST(valid_at AS DATE) = DATE '2026-10-25' + INTERVAL 1 DAY GROUP BY location_name ORDER BY temperature_max_c DESC",
+      "model": "SELECT max(temperature_max_c) FROM latest_forecast WHERE location_id IN ('barcelona', 'valencia') AND CAST(valid_at AS DATE) = DATE '2026-10-25' + INTERVAL 1 DAY",
+      "note": "Invalid SQL: uses a column of another table, and would not say which city wins anyway.",
+      "pytorchCorrect": false
+    },
+    {
+      "id": "hw-12",
+      "question": "Previsión de lluvia diaria para Santiago... perdón, para A Coruña",
+      "reference": "SELECT CAST(valid_at AS DATE) AS day, sum(precipitation_mm) AS precipitation_mm FROM latest_forecast WHERE location_id = 'a-coruna' GROUP BY day ORDER BY day",
+      "model": "SELECT sum(precipitation_mm) FROM latest_forecast WHERE location_id = 'a-coruna'",
+      "note": "One total for three days instead of one value per day.",
+      "pytorchCorrect": true
+    },
+    {
+      "id": "hw-18",
+      "question": "Top 3 capitales con más lluvia acumulada esta semana (últimos 7 días)",
+      "reference": "SELECT location_id, sum(precipitation_sum_mm) AS precipitation_sum_mm FROM daily_summary WHERE date > DATE '2026-10-25' - INTERVAL 7 DAY GROUP BY location_id ORDER BY precipitation_sum_mm DESC NULLS LAST, location_id LIMIT 3",
+      "model": "SELECT location_id, sum(precipitation_sum_mm) AS precipitation_mm FROM daily_summary WHERE date >= DATE '2026-10-25' - INTERVAL 7 DAY GROUP BY location_id ORDER BY precipitation_mm DESC, location_id LIMIT 3",
+      "note": "Off by one day: >= takes 8 days instead of 7.",
+      "pytorchCorrect": true
+    },
+    {
+      "id": "hw-20",
+      "question": "Máximas diarias en Toledo desde el 20 de octubre",
+      "reference": "SELECT date, temperature_max_c FROM daily_summary WHERE location_id = 'toledo' AND date >= DATE '2026-10-20' ORDER BY date",
+      "model": "SELECT max(temperature_max_c) FROM daily_summary WHERE location_id = 'toledo' AND date >= DATE '2026-10-20'",
+      "note": "One maximum for the whole period instead of one per day.",
+      "pytorchCorrect": false
+    },
+    {
+      "id": "hw-26",
+      "question": "¿La previsión de temperatura en Madrid suele quedarse corta o pasarse?",
+      "reference": "SELECT avg(error_temperature_c) FROM forecast_vs_observed WHERE location_id = 'madrid'",
+      "model": "SELECT avg(temperature_mae_lead_1_6h), avg(temperature_mae_lead_7_24h), avg(temperature_mae_lead_25_48h), avg(temperature_mae_lead_49_72h) FROM forecast_vs_observed WHERE location_id = 'madrid'",
+      "note": "Invalid SQL: mixes the columns of two tables; a signed bias was asked, not an absolute error.",
+      "pytorchCorrect": false
+    },
+    {
+      "id": "hw-28",
+      "question": "¿Cuánto empeora la previsión de viento en Cádiz según la antelación, ayer?",
+      "reference": "SELECT lead_hours, avg(abs(error_wind_speed_kmh)) AS mae FROM forecast_vs_observed WHERE location_id = 'cadiz' AND date = DATE '2026-10-25' - INTERVAL 1 DAY GROUP BY lead_hours ORDER BY lead_hours",
+      "model": "SELECT avg(error_wind_speed_kmh) FROM forecast_vs_observed WHERE location_id = 'cadiz' AND lead_hours = 1 AND date = DATE '2026-10-25' - INTERVAL 1 DAY",
+      "note": "Looks at one lead time only, and averages signed errors instead of their size.",
+      "pytorchCorrect": false
+    },
+    {
+      "id": "hw-29",
+      "question": "Las 5 capitales donde peor se ha previsto la temperatura en los últimos 5 días",
+      "reference": "SELECT location_id, avg(abs(error_temperature_c)) AS mae FROM forecast_vs_observed WHERE date > DATE '2026-10-25' - INTERVAL 5 DAY GROUP BY location_id ORDER BY mae DESC, location_id LIMIT 5",
+      "model": "SELECT location_id, avg(temperature_mae_lead_1_6h) AS mae_lead_1_6h, avg(temperature_mae_lead_7_24h) AS mae_lead_7_24h, avg(temperature_mae_lead_25_48h) AS mae_lead_25_48h, avg(temperature_mae_lead_49_72h) AS mae_lead_49_72h FROM forecast_vs_observed WHERE date > DATE '2026-10-20' GROUP BY location_id ORDER BY mae_lead_1_6h + mae_lead_7_24h + mae_lead_25_48h + mae_lead_49_72h DESC, location_id LIMIT 5",
+      "note": "Invalid SQL: asks forecast_vs_observed for columns that only exist in daily_summary.",
+      "pytorchCorrect": false
+    },
+    {
+      "id": "hw-34",
+      "question": "Top 3 windiest capitals tomorrow by gusts",
+      "reference": "SELECT location_name, max(wind_gusts_kmh) AS wind_gusts_max_kmh FROM latest_forecast WHERE CAST(valid_at AS DATE) = DATE '2026-10-25' + INTERVAL 1 DAY GROUP BY location_name ORDER BY wind_gusts_max_kmh DESC, location_name LIMIT 3",
+      "model": "SELECT location_name, max(wind_gusts_kmh) AS wind_gusts_max_kmh FROM latest_forecast GROUP BY location_name ORDER BY wind_gusts_max_kmh DESC, location_name LIMIT 3",
+      "note": "Dropped \"tomorrow\": ranks the whole three-day forecast.",
+      "pytorchCorrect": true
+    }
+  ]
+}

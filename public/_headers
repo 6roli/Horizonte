@@ -3,11 +3,17 @@
 # The weather snapshot comes from Hugging Face, which redirects to its CDN (*.hf.co).
 # Referrer-Policy is no-referrer because Hugging Face answers 404 to requests that
 # carry a Referer from a *.workers.dev page (fetch() also sets it explicitly).
+# The Ask module (/ask/) loads DuckDB-WASM and ONNX Runtime (.wasm files above
+# Cloudflare's 25 MiB limit) from jsDelivr at pinned versions, compiles WebAssembly
+# ('wasm-unsafe-eval') and starts workers: DuckDB's from a blob: URL that imports the
+# jsDelivr script, the model's from /assets/. A worker script gets the policy of its
+# own URL, so this is one site-wide policy rather than a rule for /ask/ only.
+# DuckDB loads its Parquet extension from extensions.duckdb.org.
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; img-src 'self' data: https://view.eumetsat.int; connect-src 'self' https://view.eumetsat.int https://huggingface.co https://*.hf.co; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: https://view.eumetsat.int; connect-src 'self' https://view.eumetsat.int https://huggingface.co https://*.hf.co https://cdn.jsdelivr.net https://extensions.duckdb.org; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
